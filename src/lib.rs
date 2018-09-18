@@ -29,7 +29,7 @@ use Piece::*;
 
 pub type Square = Option<(Player, Piece)>;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pos {
     rank: u8,
     file: u8
@@ -67,7 +67,7 @@ fn coords(board: &Board) -> Vec<Pos> {
     }).collect()
 }
 
-fn piece_at(pos: &Pos, board: &Board) -> Option<(Player,Piece)> {
+fn piece_at(pos: &Pos, board: &Board) -> Square {
     board.row(pos.rank as usize)[pos.file as usize]
 }
 
@@ -178,5 +178,63 @@ pub fn player_str(player: Player) -> &'static str {
     match player {
         White => "White",
         Black => "Black",
+    }
+}
+
+#[cfg(test)]
+mod test {
+    fn test_board() -> ::Board {
+        ::Board::from_rows(&[
+            ::RowVector2::new(Some((::White, ::Pawn)), Some((::White,::Pawn))),
+            ::RowVector2::new(None, None),
+            ::RowVector2::new(Some((::Black, ::Pawn)), Some((::Black,::Pawn))),
+        ])
+    }
+
+    #[test]
+    fn new_game_starts_white() {
+        let game = ::new_game();
+        assert_eq!(game.state.current_player, ::White);
+    }
+
+    #[test]
+    fn piece_at_finds_piece() {
+        let a1 = &::Pos {rank:0, file: 0};
+        let a2 = &::Pos {rank:1, file: 0};
+        let b3 = &::Pos {rank:2, file: 1};
+
+        let board = &test_board();
+
+        assert_eq!(::piece_at(a1, board), Some((::White, ::Pawn)));
+        assert_eq!(::piece_at(a2, board), None);
+        assert_eq!(::piece_at(b3, board), Some((::Black, ::Pawn)));
+    }
+
+    #[test]
+    fn coords() {
+        let board = &test_board();
+        assert_eq!(::coords(board), vec![
+            ::Pos{rank:0, file:0},
+            ::Pos{rank:0, file:1},
+            ::Pos{rank:1, file:0},
+            ::Pos{rank:1, file:1},
+            ::Pos{rank:2, file:0},
+            ::Pos{rank:2, file:1},
+        ]);
+    }
+
+    #[test]
+    fn can_move() {
+        let board = &test_board();
+        let a1 = &::Pos {rank:0, file: 0};
+        let a2 = &::Pos {rank:1, file: 0};
+        let a3 = &::Pos {rank:2, file: 0};
+        let b2 = &::Pos {rank:1, file: 1};
+        let b3 = &::Pos {rank:2, file: 1};
+
+        assert!(::can_move(board, &::White, a1, a2));
+        assert!(!::can_move(board, &::White, a1, a3));
+        assert!(!::can_move(board, &::White, b3, b2));
+        assert!(::can_move(board, &::Black, b3, b2));
     }
 }
