@@ -2,6 +2,15 @@
 name = "chess"
 version = "0.1.0"
 authors = ["Michael Hoy <mjh@mjhoy.com>"]
+autobins = false
+
+[lib]
+name = "chess"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chess"
+path = "src/bin/main.rs"
 
 [dependencies]
 nalgebra = "0.16.0"
