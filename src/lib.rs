@@ -192,65 +192,68 @@ pub fn player_str(player: Player) -> &'static str {
 
 #[cfg(test)]
 mod test {
-    fn test_board() -> ::Board {
-        ::Board::from_rows(&[
-            ::RowVector3::new(Some((::White, ::Pawn)), Some((::White, ::King)), Some((::White,::Pawn))),
-            ::RowVector3::new(None, None, None),
-            ::RowVector3::new(Some((::Black, ::Pawn)), Some((::Black, ::King)), Some((::Black,::Pawn))),
+
+    use ::*;
+
+    fn test_board() -> Board {
+        Board::from_rows(&[
+            RowVector3::new(Some((White, Pawn)), Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(None, None, None),
+            RowVector3::new(Some((Black, Pawn)), Some((Black, King)), Some((Black,Pawn))),
         ])
     }
 
     #[test]
-    fn new_game_starts_white() {
-        let game = ::new_game();
-        assert_eq!(game.state.player, ::White);
+    fn test_new_game_starts_white() {
+        let game = new_game();
+        assert_eq!(game.state.player, White);
     }
 
     #[test]
-    fn piece_at_finds_piece() {
-        let a1 = &::Pos {rank:0, file: 0};
-        let a2 = &::Pos {rank:1, file: 0};
-        let b3 = &::Pos {rank:2, file: 1};
+    fn test_piece_at_finds_piece() {
+        let a1 = &Pos {rank:0, file: 0};
+        let a2 = &Pos {rank:1, file: 0};
+        let b3 = &Pos {rank:2, file: 1};
 
         let board = &test_board();
 
-        assert_eq!(::piece_at(a1, board), Some((::White, ::Pawn)));
-        assert_eq!(::piece_at(a2, board), None);
-        assert_eq!(::piece_at(b3, board), Some((::Black, ::King)));
+        assert_eq!(piece_at(a1, board), Some((White, Pawn)));
+        assert_eq!(piece_at(a2, board), None);
+        assert_eq!(piece_at(b3, board), Some((Black, King)));
     }
 
     #[test]
-    fn coords() {
+    fn test_coords() {
         let board = &test_board();
         assert_eq!(::coords(board), vec![
-            ::Pos{rank:0, file:0},
-            ::Pos{rank:0, file:1},
-            ::Pos{rank:0, file:2},
-            ::Pos{rank:1, file:0},
-            ::Pos{rank:1, file:1},
-            ::Pos{rank:1, file:2},
-            ::Pos{rank:2, file:0},
-            ::Pos{rank:2, file:1},
-            ::Pos{rank:2, file:2},
+            Pos{rank:0, file:0},
+            Pos{rank:0, file:1},
+            Pos{rank:0, file:2},
+            Pos{rank:1, file:0},
+            Pos{rank:1, file:1},
+            Pos{rank:1, file:2},
+            Pos{rank:2, file:0},
+            Pos{rank:2, file:1},
+            Pos{rank:2, file:2},
         ]);
     }
 
     #[test]
-    fn can_move() {
+    fn test_can_move() {
         let board = &test_board();
-        let a1 = &::Pos {rank:0, file: 0};
-        let a2 = &::Pos {rank:1, file: 0};
-        let a3 = &::Pos {rank:2, file: 0};
-        let b2 = &::Pos {rank:1, file: 1};
-        let b3 = &::Pos {rank:2, file: 1};
+        let a1 = &Pos {rank:0, file: 0};
+        let a2 = &Pos {rank:1, file: 0};
+        let a3 = &Pos {rank:2, file: 0};
+        let b2 = &Pos {rank:1, file: 1};
+        let b3 = &Pos {rank:2, file: 1};
 
-        let white_move = ::State { board: *board, player: ::White };
-        let black_move = ::State { board: *board, player: ::Black };
+        let white_move = State { board: *board, player: White };
+        let black_move = State { board: *board, player: Black };
 
-        assert!(::can_move(&white_move, a1, a2));
-        assert!(!::can_move(&white_move, a1, a3));
-        assert!(!::can_move(&white_move, b3, b2));
-        assert!(::can_move(&black_move, b3, b2));
-        assert!(::can_move(&black_move, b3, a2));
+        assert!(can_move(&white_move, a1, a2));
+        assert!(!can_move(&white_move, a1, a3));
+        assert!(!can_move(&white_move, b3, b2));
+        assert!(can_move(&black_move, b3, b2));
+        assert!(can_move(&black_move, b3, a2));
     }
 }
