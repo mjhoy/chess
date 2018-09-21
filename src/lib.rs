@@ -37,16 +37,16 @@ pub struct Pos {
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct GameState {
+pub struct State {
     pub board: Board,
-    pub current_player: Player,
+    pub player: Player,
 }
 
 // start with a 3x3 board
 pub type Board = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 
 pub struct Game {
-    pub state: GameState,
+    pub state: State,
 }
 
 pub struct Move {
@@ -74,15 +74,15 @@ fn piece_at(pos: &Pos, board: &Board) -> Square {
 
 pub fn new_game() -> Game {
     let board = initial_board();
-    let current_player = White;
-    let state = GameState { board, current_player, };
+    let player = White;
+    let state = State { board, player, };
     Game {
         state: state,
     }
 }
 
 // movement logic
-pub fn can_move(board: &Board, player: &Player, from_pos: &Pos, to_pos: &Pos) -> bool {
+pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     fn can_move_pawn(player: &Player, from_pos: &Pos, to_pos: &Pos, capture: bool) -> bool {
         let next_rank = from_pos.rank as i32 + if *player == White { 1 } else { -1 };
         if to_pos.rank != next_rank as u8 { return false; }
@@ -100,17 +100,17 @@ pub fn can_move(board: &Board, player: &Player, from_pos: &Pos, to_pos: &Pos) ->
             ((from_pos.file as i32) - (to_pos.file as i32)).abs() <= 1
     }
 
-    let from = piece_at(from_pos, board);
-    let to   = piece_at(to_pos, board);
+    let from = piece_at(from_pos, &state.board);
+    let to   = piece_at(to_pos, &state.board);
 
     match from {
-        Some((from_player, piece)) if from_player == *player => {
+        Some((from_player, piece)) if from_player == state.player => {
             match to {
-                Some((to_player, _)) if to_player == *player => false,
+                Some((to_player, _)) if to_player == state.player => false,
                 _ => {
                     match piece {
-                        Pawn => can_move_pawn(&player, &from_pos, &to_pos, to.is_some()),
-                        King => can_move_king(&player, &from_pos, &to_pos, to.is_some()),
+                        Pawn => can_move_pawn(&state.player, &from_pos, &to_pos, to.is_some()),
+                        King => can_move_king(&state.player, &from_pos, &to_pos, to.is_some()),
                     }
                 }
             }
@@ -129,16 +129,16 @@ pub fn move_piece(board: &Board, from_pos: &Pos, to_pos: &Pos) -> Board {
 }
 
 // On^2 for n squares
-pub fn gen_moves(state: GameState) -> Vec<Move> {
+pub fn gen_moves(state: State) -> Vec<Move> {
     coords(&state.board).iter().flat_map(|from_pos| {
         coords(&state.board).iter().filter_map(|to_pos| {
-            if can_move(&state.board, &state.current_player, from_pos, to_pos) {
+            if can_move(&state, from_pos, to_pos) {
                 Some(Move {
                     index: (*from_pos, *to_pos),
                     next: Game {
-                        state: GameState {
+                        state: State {
                             board: move_piece(&state.board, from_pos, to_pos),
-                            current_player: state.current_player.other(),
+                            player: state.player.other(),
                         },
                     }
                 })
@@ -203,7 +203,7 @@ mod test {
     #[test]
     fn new_game_starts_white() {
         let game = ::new_game();
-        assert_eq!(game.state.current_player, ::White);
+        assert_eq!(game.state.player, ::White);
     }
 
     #[test]
@@ -244,10 +244,13 @@ mod test {
         let b2 = &::Pos {rank:1, file: 1};
         let b3 = &::Pos {rank:2, file: 1};
 
-        assert!(::can_move(board, &::White, a1, a2));
-        assert!(!::can_move(board, &::White, a1, a3));
-        assert!(!::can_move(board, &::White, b3, b2));
-        assert!(::can_move(board, &::Black, b3, b2));
-        assert!(::can_move(board, &::Black, b3, a2));
+        let white_move = ::State { board: *board, player: ::White };
+        let black_move = ::State { board: *board, player: ::Black };
+
+        assert!(::can_move(&white_move, a1, a2));
+        assert!(!::can_move(&white_move, a1, a3));
+        assert!(!::can_move(&white_move, b3, b2));
+        assert!(::can_move(&black_move, b3, b2));
+        assert!(::can_move(&black_move, b3, a2));
     }
 }

@@ -20,7 +20,7 @@ fn main() {
             break;
         }
 
-        println!("{}'s move.", player_str(game.state.current_player));
+        println!("{}'s move.", player_str(game.state.player));
         for i in 0..moves.len() {
             let m0ve = &moves[i];
             println!("{}: {}", i+1, move_str(&m0ve));
