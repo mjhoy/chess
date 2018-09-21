@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 #[macro_use] extern crate itertools;
 
-use na::{U2, U3, MatrixArray, Matrix, RowVector2};
+use na::{U3, MatrixArray, Matrix, RowVector3};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Player {
@@ -23,6 +23,7 @@ impl Player {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Piece {
     Pawn,
+    King,
 }
 
 use Piece::*;
@@ -41,8 +42,8 @@ pub struct GameState {
     pub current_player: Player,
 }
 
-// start with a 2x3 board
-pub type Board = Matrix<Square, U3, U2, MatrixArray<Square, U3, U2>>;
+// start with a 3x3 board
+pub type Board = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 
 pub struct Game {
     pub state: GameState,
@@ -55,9 +56,9 @@ pub struct Move {
 
 fn initial_board() -> Board {
     Board::from_rows(&[
-        RowVector2::new(Some((White, Pawn)), Some((White,Pawn))),
-        RowVector2::new(None, None),
-        RowVector2::new(Some((Black, Pawn)), Some((Black,Pawn))),
+        RowVector3::new(Some((White, Pawn)), Some((White,King)), Some((White,Pawn))),
+        RowVector3::new(None, None, None),
+        RowVector3::new(Some((Black, Pawn)), Some((Black,King)), Some((Black,Pawn))),
     ])
 }
 
@@ -94,6 +95,11 @@ pub fn can_move(board: &Board, player: &Player, from_pos: &Pos, to_pos: &Pos) ->
         }
     }
 
+    fn can_move_king(_player: &Player, from_pos: &Pos, to_pos: &Pos, _capture: bool) -> bool {
+        ((from_pos.rank as i32) - (to_pos.rank as i32)).abs() <= 1 &&
+            ((from_pos.file as i32) - (to_pos.file as i32)).abs() <= 1
+    }
+
     let from = piece_at(from_pos, board);
     let to   = piece_at(to_pos, board);
 
@@ -103,7 +109,8 @@ pub fn can_move(board: &Board, player: &Player, from_pos: &Pos, to_pos: &Pos) ->
                 Some((to_player, _)) if to_player == *player => false,
                 _ => {
                     match piece {
-                        Pawn => can_move_pawn(&player, &from_pos, &to_pos, to.is_some())
+                        Pawn => can_move_pawn(&player, &from_pos, &to_pos, to.is_some()),
+                        King => can_move_king(&player, &from_pos, &to_pos, to.is_some()),
                     }
                 }
             }
@@ -147,7 +154,9 @@ pub fn board_str(game: &Game) -> String {
         let piece_str = match square {
             None => " ",
             Some((White,Pawn)) => "♙",
+            Some((White,King)) => "♔",
             Some((Black,Pawn)) => "♟",
+            Some((Black,King)) => "♚",
         };
         format!("{}",piece_str)
     }
@@ -185,9 +194,9 @@ pub fn player_str(player: Player) -> &'static str {
 mod test {
     fn test_board() -> ::Board {
         ::Board::from_rows(&[
-            ::RowVector2::new(Some((::White, ::Pawn)), Some((::White,::Pawn))),
-            ::RowVector2::new(None, None),
-            ::RowVector2::new(Some((::Black, ::Pawn)), Some((::Black,::Pawn))),
+            ::RowVector3::new(Some((::White, ::Pawn)), Some((::White, ::King)), Some((::White,::Pawn))),
+            ::RowVector3::new(None, None, None),
+            ::RowVector3::new(Some((::Black, ::Pawn)), Some((::Black, ::King)), Some((::Black,::Pawn))),
         ])
     }
 
@@ -207,7 +216,7 @@ mod test {
 
         assert_eq!(::piece_at(a1, board), Some((::White, ::Pawn)));
         assert_eq!(::piece_at(a2, board), None);
-        assert_eq!(::piece_at(b3, board), Some((::Black, ::Pawn)));
+        assert_eq!(::piece_at(b3, board), Some((::Black, ::King)));
     }
 
     #[test]
@@ -216,10 +225,13 @@ mod test {
         assert_eq!(::coords(board), vec![
             ::Pos{rank:0, file:0},
             ::Pos{rank:0, file:1},
+            ::Pos{rank:0, file:2},
             ::Pos{rank:1, file:0},
             ::Pos{rank:1, file:1},
+            ::Pos{rank:1, file:2},
             ::Pos{rank:2, file:0},
             ::Pos{rank:2, file:1},
+            ::Pos{rank:2, file:2},
         ]);
     }
 
@@ -236,5 +248,6 @@ mod test {
         assert!(!::can_move(board, &::White, a1, a3));
         assert!(!::can_move(board, &::White, b3, b2));
         assert!(::can_move(board, &::Black, b3, b2));
+        assert!(::can_move(board, &::Black, b3, a2));
     }
 }
