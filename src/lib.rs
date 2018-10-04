@@ -36,7 +36,7 @@ pub struct Pos {
     file: u8
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub board: Board,
     pub player: Player,
@@ -129,7 +129,7 @@ pub fn move_piece(board: &Board, from_pos: &Pos, to_pos: &Pos) -> Board {
 }
 
 // On^2 for n squares
-pub fn gen_moves(state: State) -> Vec<Move> {
+pub fn gen_moves(state: &State) -> Vec<Move> {
     coords(&state.board).iter().flat_map(|from_pos| {
         coords(&state.board).iter().filter_map(|to_pos| {
             if can_move(&state, from_pos, to_pos) {

@@ -11,7 +11,7 @@ fn main() {
     while !*ended {
         println!("\n{}", board_str(&game));
 
-        let moves = gen_moves(game.state);
+        let moves = gen_moves(&game.state);
 
         if moves.len() == 0 {
             println!("Game over! RET quits.");
