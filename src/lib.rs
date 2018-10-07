@@ -82,18 +82,14 @@ pub fn new_game() -> Game {
 }
 
 pub fn get_king_pos(board: &Board, player: &Player) -> Option<Pos> {
-    let mut found_pos: Option<Pos> = None;
-
     for coord in coords(board) {
-        let piece = piece_at(&coord, board);
-
-        match piece {
-            Some((plyr, King)) if &plyr == player => found_pos = Some(coord),
+        match piece_at(&coord, board) {
+            Some((plyr, King)) if &plyr == player => return Some(coord),
             _ => ()
         }
     }
 
-    found_pos
+    None
 }
 
 // is the current player in check?
@@ -101,10 +97,10 @@ pub fn in_check(state: &State) -> bool {
     match get_king_pos(&state.board, &state.player) {
         None => false,
         Some(to_pos) => {
-            let alternate_player = State { board: state.board, player: state.player.other() };
+            let next_move_state = State { board: state.board, player: state.player.other() };
 
             for from_pos in coords(&state.board) {
-                if can_move_pseudo(&alternate_player, &from_pos, &to_pos) {
+                if can_move_pseudo(&next_move_state, &from_pos, &to_pos) {
                     return true;
                 }
             }
@@ -113,8 +109,7 @@ pub fn in_check(state: &State) -> bool {
     }
 }
 
-// movement logic before taking into account whether king is in check
-pub fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
+fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     fn can_move_pawn(player: &Player, from_pos: &Pos, to_pos: &Pos, capture: bool) -> bool {
         let next_rank = from_pos.rank as i32 + if *player == White { 1 } else { -1 };
         if to_pos.rank != next_rank as u8 { return false; }
