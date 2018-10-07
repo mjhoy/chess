@@ -81,6 +81,22 @@ pub fn new_game() -> Game {
     }
 }
 
+pub fn get_king_pos(board: &Board, player: &Player) -> Option<Pos> {
+    let mut found_pos: Option<Pos> = None;
+
+    for coord in coords(board) {
+        let piece = piece_at(&coord, board);
+
+        match piece {
+            Some((plyr, King)) if &plyr == player => found_pos = Some(coord),
+            _ => ()
+        }
+    }
+
+    found_pos
+}
+
+
 // movement logic
 pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     fn can_move_pawn(player: &Player, from_pos: &Pos, to_pos: &Pos, capture: bool) -> bool {
@@ -255,5 +271,13 @@ mod test {
         assert!(!can_move(&white_move, b3, b2));
         assert!(can_move(&black_move, b3, b2));
         assert!(can_move(&black_move, b3, a2));
+    }
+
+    #[test]
+    fn test_get_king_pos() {
+        let board = &test_board();
+
+        assert_eq!(get_king_pos(board, &White), Some(Pos {rank: 0, file: 1}));
+        assert_eq!(get_king_pos(board, &Black), Some(Pos {rank: 2, file: 1}));
     }
 }
