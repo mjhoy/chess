@@ -96,9 +96,25 @@ pub fn get_king_pos(board: &Board, player: &Player) -> Option<Pos> {
     found_pos
 }
 
+// is the current player in check?
+pub fn in_check(state: &State) -> bool {
+    match get_king_pos(&state.board, &state.player) {
+        None => false,
+        Some(to_pos) => {
+            let alternate_player = State { board: state.board, player: state.player.other() };
 
-// movement logic
-pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
+            for from_pos in coords(&state.board) {
+                if can_move_pseudo(&alternate_player, &from_pos, &to_pos) {
+                    return true;
+                }
+            }
+            false
+        }
+    }
+}
+
+// movement logic before taking into account whether king is in check
+pub fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     fn can_move_pawn(player: &Player, from_pos: &Pos, to_pos: &Pos, capture: bool) -> bool {
         let next_rank = from_pos.rank as i32 + if *player == White { 1 } else { -1 };
         if to_pos.rank != next_rank as u8 { return false; }
@@ -132,6 +148,16 @@ pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
             }
         }
         _ => false
+    }
+}
+
+// movement logic
+pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
+    if can_move_pseudo(state, from_pos, to_pos) {
+        !in_check(&State { player: state.player,
+                           board: move_piece(&state.board, from_pos, to_pos) })
+    } else {
+        false
     }
 }
 
@@ -255,7 +281,7 @@ mod test {
     }
 
     #[test]
-    fn test_can_move() {
+    fn test_can_move_pseudo() {
         let board = &test_board();
         let a1 = &Pos {rank:0, file: 0};
         let a2 = &Pos {rank:1, file: 0};
@@ -266,11 +292,11 @@ mod test {
         let white_move = State { board: *board, player: White };
         let black_move = State { board: *board, player: Black };
 
-        assert!(can_move(&white_move, a1, a2));
-        assert!(!can_move(&white_move, a1, a3));
-        assert!(!can_move(&white_move, b3, b2));
-        assert!(can_move(&black_move, b3, b2));
-        assert!(can_move(&black_move, b3, a2));
+        assert!(can_move_pseudo(&white_move, a1, a2));
+        assert!(!can_move_pseudo(&white_move, a1, a3));
+        assert!(!can_move_pseudo(&white_move, b3, b2));
+        assert!(can_move_pseudo(&black_move, b3, b2));
+        assert!(can_move_pseudo(&black_move, b3, a2));
     }
 
     #[test]
@@ -279,5 +305,32 @@ mod test {
 
         assert_eq!(get_king_pos(board, &White), Some(Pos {rank: 0, file: 1}));
         assert_eq!(get_king_pos(board, &Black), Some(Pos {rank: 2, file: 1}));
+    }
+
+    #[test]
+    fn test_in_check() {
+        let not_in_check_board = Board::from_rows(&[
+            RowVector3::new(Some((White, Pawn)), Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(None, None, None),
+            RowVector3::new(Some((Black, Pawn)), Some((Black, King)), Some((Black,Pawn))),
+        ]);
+
+        assert!(!in_check(&State { board: not_in_check_board, player: White }));
+
+        let in_check_board_1 = Board::from_rows(&[
+            RowVector3::new(Some((White, Pawn)), Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(Some((Black, Pawn)), None, None),
+            RowVector3::new(None, Some((Black, King)), Some((Black,Pawn))),
+        ]);
+
+        assert!(in_check(&State { board: in_check_board_1, player: White }));
+
+        let in_check_board_2 = Board::from_rows(&[
+            RowVector3::new(None, Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(Some((White, Pawn)), None, Some((Black, Pawn))),
+            RowVector3::new(Some((Black, Pawn)), Some((Black, King)), None),
+        ]);
+
+        assert!(in_check(&State { board: in_check_board_2, player: Black }));
     }
 }
