@@ -42,7 +42,7 @@ pub struct State {
     pub player: Player,
 }
 
-// start with a 3x3 board
+/// 3x3 board
 pub type Board = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 
 pub struct Game {
@@ -72,6 +72,7 @@ fn piece_at(pos: &Pos, board: &Board) -> Square {
     board.row(pos.rank as usize)[pos.file as usize]
 }
 
+/// Initial game.
 pub fn new_game() -> Game {
     let board = initial_board();
     let player = White;
@@ -81,34 +82,36 @@ pub fn new_game() -> Game {
     }
 }
 
-pub fn get_king_pos(board: &Board, player: &Player) -> Option<Pos> {
+/// Find the position of the king for `player`. Panics if no king is
+/// found.
+pub fn get_king_pos(board: &Board, player: &Player) -> Pos {
     for coord in coords(board) {
-        match piece_at(&coord, board) {
-            Some((plyr, King)) if &plyr == player => return Some(coord),
-            _ => ()
+        if let Some((plyr, King)) = piece_at(&coord, board)  {
+            if &plyr == player { return coord; }
         }
     }
 
-    None
+    panic!("No king on the board")
 }
 
-// is the current player in check?
+/// Is the current player in check?
 pub fn in_check(state: &State) -> bool {
-    match get_king_pos(&state.board, &state.player) {
-        None => false,
-        Some(to_pos) => {
-            let next_move_state = State { board: state.board, player: state.player.other() };
+    let to_pos = get_king_pos(&state.board, &state.player);
+    let next_move_state = State {
+        board: state.board,
+        player: state.player.other(),
+    };
 
-            for from_pos in coords(&state.board) {
-                if can_move_pseudo(&next_move_state, &from_pos, &to_pos) {
-                    return true;
-                }
-            }
-            false
+    for from_pos in coords(&state.board) {
+        if can_move_pseudo(&next_move_state, &from_pos, &to_pos) {
+            return true;
         }
     }
+    false
 }
 
+/// Can the current player move the piece, not taking into account
+/// whether the king is in check?
 fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     fn can_move_pawn(player: &Player, from_pos: &Pos, to_pos: &Pos, capture: bool) -> bool {
         let next_rank = from_pos.rank as i32 + if *player == White { 1 } else { -1 };
@@ -146,7 +149,7 @@ fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     }
 }
 
-// movement logic
+/// Can the current player move the piece in `from_pos` to `to_pos`?
 pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     if can_move_pseudo(state, from_pos, to_pos) {
         !in_check(&State { player: state.player,
@@ -156,6 +159,7 @@ pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
     }
 }
 
+/// Move the piece at `from_pos` to `to_pos` and return the new board.
 pub fn move_piece(board: &Board, from_pos: &Pos, to_pos: &Pos) -> Board {
     let new_board: &mut Board = &mut board.clone();
     let from = piece_at(from_pos, board);
@@ -165,7 +169,8 @@ pub fn move_piece(board: &Board, from_pos: &Pos, to_pos: &Pos) -> Board {
     new_board.clone()
 }
 
-// On^2 for n squares
+/// Generate the next legal moves for this game state.
+/// On^2 for n squares
 pub fn gen_moves(state: &State) -> Vec<Move> {
     coords(&state.board).iter().flat_map(|from_pos| {
         coords(&state.board).iter().filter_map(|to_pos| {
@@ -186,6 +191,7 @@ pub fn gen_moves(state: &State) -> Vec<Move> {
     }).collect()
 }
 
+/// Pretty print the board.
 pub fn board_str(game: &Game) -> String {
     fn piece_str(square: &Square) -> String {
         let piece_str = match square {
@@ -211,6 +217,7 @@ pub fn board_str(game: &Game) -> String {
     buf
 }
 
+/// Pretty print a move.
 pub fn move_str(m0ve: &Move) -> String {
     let (from, to) = m0ve.index;
     let from_file = (from.file + 'A' as u8) as char;
@@ -220,6 +227,7 @@ pub fn move_str(m0ve: &Move) -> String {
     format!("{}{} -> {}{}", from_file, from_rank, to_file, to_rank)
 }
 
+/// Pretty print a player.
 pub fn player_str(player: Player) -> &'static str {
     match player {
         White => "White",
@@ -305,27 +313,48 @@ mod test {
     #[test]
     fn test_in_check() {
         let not_in_check_board = Board::from_rows(&[
-            RowVector3::new(Some((White, Pawn)), Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(
+                Some((White, Pawn)),
+                Some((White, King)),
+                Some((White, Pawn)),
+            ),
             RowVector3::new(None, None, None),
-            RowVector3::new(Some((Black, Pawn)), Some((Black, King)), Some((Black,Pawn))),
+            RowVector3::new(
+                Some((Black, Pawn)),
+                Some((Black, King)),
+                Some((Black, Pawn)),
+            ),
         ]);
 
-        assert!(!in_check(&State { board: not_in_check_board, player: White }));
+        assert!(!in_check(&State {
+            board: not_in_check_board,
+            player: White
+        }));
 
         let in_check_board_1 = Board::from_rows(&[
-            RowVector3::new(Some((White, Pawn)), Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(
+                Some((White, Pawn)),
+                Some((White, King)),
+                Some((White, Pawn)),
+            ),
             RowVector3::new(Some((Black, Pawn)), None, None),
-            RowVector3::new(None, Some((Black, King)), Some((Black,Pawn))),
+            RowVector3::new(None, Some((Black, King)), Some((Black, Pawn))),
         ]);
 
-        assert!(in_check(&State { board: in_check_board_1, player: White }));
+        assert!(in_check(&State {
+            board: in_check_board_1,
+            player: White
+        }));
 
         let in_check_board_2 = Board::from_rows(&[
-            RowVector3::new(None, Some((White, King)), Some((White,Pawn))),
+            RowVector3::new(None, Some((White, King)), Some((White, Pawn))),
             RowVector3::new(Some((White, Pawn)), None, Some((Black, Pawn))),
             RowVector3::new(Some((Black, Pawn)), Some((Black, King)), None),
         ]);
 
-        assert!(in_check(&State { board: in_check_board_2, player: Black }));
+        assert!(in_check(&State {
+            board: in_check_board_2,
+            player: Black
+        }));
     }
 }
