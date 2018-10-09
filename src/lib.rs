@@ -160,14 +160,10 @@ fn can_move_pseudo(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
 
 /// Can the current player move the piece in `from_pos` to `to_pos`?
 pub fn can_move(state: &State, from_pos: &Pos, to_pos: &Pos) -> bool {
-    if can_move_pseudo(state, from_pos, to_pos) {
-        !in_check(&State {
-            player: state.player,
-            board: move_piece(&state.board, from_pos, to_pos),
-        })
-    } else {
-        false
-    }
+    can_move_pseudo(state, from_pos, to_pos) && !in_check(&State {
+        player: state.player,
+        board: move_piece(&state.board, from_pos, to_pos),
+    })
 }
 
 /// Move the piece at `from_pos` to `to_pos` and return the new board.
