@@ -1,7 +1,7 @@
 use std::io;
 
 extern crate chess;
-use chess::{board_str, gen_moves, move_str, new_game, player_str};
+use chess::{gen_moves, move_str, new_game, player_str};
 
 fn main() {
     let mut game = new_game();
@@ -9,7 +9,7 @@ fn main() {
     let mut buf = String::new();
 
     while !*ended {
-        println!("\n{}", board_str(&game));
+        println!("\n{}", game.state.board.str());
 
         let moves = gen_moves(&game.state);
 

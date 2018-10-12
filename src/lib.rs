@@ -2,8 +2,6 @@ extern crate nalgebra as na;
 #[macro_use]
 extern crate itertools;
 
-use na::RowVector3;
-
 pub mod player;
 use player::Player;
 use player::Player::*;
@@ -30,65 +28,23 @@ use game::Game;
 pub mod m0ve;
 use m0ve::Move;
 
-fn initial_board() -> Board {
-    Board::from_rows(&[
-        RowVector3::new(
-            Some((White, Pawn)),
-            Some((White, King)),
-            Some((White, Pawn)),
-        ),
-        RowVector3::new(None, None, None),
-        RowVector3::new(
-            Some((Black, Pawn)),
-            Some((Black, King)),
-            Some((Black, Pawn)),
-        ),
-    ])
-}
-
-fn coords(board: &Board) -> Vec<Pos> {
-    iproduct!(0..board.nrows(), 0..board.ncols())
-        .map(|(rank, file)| Pos {
-            rank: rank as u8,
-            file: file as u8,
-        }).collect()
-}
-
-fn piece_at(pos: Pos, board: &Board) -> Square {
-    board.row(pos.rank as usize)[pos.file as usize]
-}
-
 /// Initial game.
 pub fn new_game() -> Game {
-    let board = initial_board();
+    let board = Board::initial();
     let player = White;
     let state = State { board, player };
     Game { state }
 }
 
-/// Find the position of the king for `player`. Panics if no king is
-/// found.
-pub fn get_king_pos(board: &Board, player: Player) -> Pos {
-    for coord in coords(board) {
-        if let Some((plyr, King)) = piece_at(coord, board) {
-            if plyr == player {
-                return coord;
-            }
-        }
-    }
-
-    panic!("No king on the board")
-}
-
 /// Is the current player in check?
 pub fn in_check(state: &State) -> bool {
-    let to_pos = get_king_pos(&state.board, state.player);
+    let to_pos = state.board.get_king_pos(state.player);
     let next_move_state = State {
         board: state.board,
         player: state.player.other(),
     };
 
-    for from_pos in coords(&state.board) {
+    for from_pos in state.board.coords() {
         if can_move_pseudo(&next_move_state, from_pos, to_pos) {
             return true;
         }
@@ -118,8 +74,8 @@ fn can_move_pseudo(state: &State, from_pos: Pos, to_pos: Pos) -> bool {
             && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
     }
 
-    let from = piece_at(from_pos, &state.board);
-    let to = piece_at(to_pos, &state.board);
+    let from = state.board.piece_at(from_pos);
+    let to = state.board.piece_at(to_pos);
 
     match from {
         Some((from_player, piece)) if from_player == state.player => match to {
@@ -137,27 +93,21 @@ fn can_move_pseudo(state: &State, from_pos: Pos, to_pos: Pos) -> bool {
 pub fn can_move(state: &State, from_pos: Pos, to_pos: Pos) -> bool {
     can_move_pseudo(state, from_pos, to_pos) && !in_check(&State {
         player: state.player,
-        board: move_piece(&state.board, from_pos, to_pos),
+        board: state.board.move_piece(from_pos, to_pos),
     })
-}
-
-/// Move the piece at `from_pos` to `to_pos` and return the new board.
-pub fn move_piece(board: &Board, from_pos: Pos, to_pos: Pos) -> Board {
-    let new_board: &mut Board = &mut board.clone();
-    let from = piece_at(from_pos, board);
-    new_board[(from_pos.rank as usize, from_pos.file as usize)] = None;
-    new_board[(to_pos.rank as usize, to_pos.file as usize)] = from;
-
-    *new_board
 }
 
 /// Generate the next legal moves for this game state.
 /// On^2 for n squares
 pub fn gen_moves(state: &State) -> Vec<Move> {
-    coords(&state.board)
+    state
+        .board
+        .coords()
         .iter()
         .flat_map(|from_pos| {
-            coords(&state.board)
+            state
+                .board
+                .coords()
                 .iter()
                 .filter_map(|to_pos| {
                     if can_move(&state, *from_pos, *to_pos) {
@@ -165,7 +115,7 @@ pub fn gen_moves(state: &State) -> Vec<Move> {
                             index: (*from_pos, *to_pos),
                             next: Game {
                                 state: State {
-                                    board: move_piece(&state.board, *from_pos, *to_pos),
+                                    board: state.board.move_piece(*from_pos, *to_pos),
                                     player: state.player.other(),
                                 },
                             },
@@ -175,32 +125,6 @@ pub fn gen_moves(state: &State) -> Vec<Move> {
                     }
                 }).collect::<Vec<Move>>()
         }).collect()
-}
-
-/// Pretty print the board.
-pub fn board_str(game: &Game) -> String {
-    fn piece_str(square: Square) -> String {
-        let piece_str = match square {
-            None => " ",
-            Some((White, Pawn)) => "♙",
-            Some((White, King)) => "♔",
-            Some((Black, Pawn)) => "♟",
-            Some((Black, King)) => "♚",
-        };
-        piece_str.to_string()
-    }
-
-    let mut buf = String::new();
-
-    for rowi in (0..game.state.board.nrows()).rev() {
-        let row = &game.state.board.row(rowi);
-        for piece in row.iter() {
-            buf.push_str(&piece_str(*piece));
-        }
-        buf.push_str("\n");
-    }
-
-    buf
 }
 
 /// Pretty print a move.
@@ -224,60 +148,17 @@ pub fn player_str(player: Player) -> &'static str {
 #[cfg(test)]
 mod test {
 
+    use na::RowVector3;
     use *;
 
     fn test_board() -> Board {
-        Board::from_rows(&[
-            RowVector3::new(
-                Some((White, Pawn)),
-                Some((White, King)),
-                Some((White, Pawn)),
-            ),
-            RowVector3::new(None, None, None),
-            RowVector3::new(
-                Some((Black, Pawn)),
-                Some((Black, King)),
-                Some((Black, Pawn)),
-            ),
-        ])
+        Board::initial()
     }
 
     #[test]
     fn test_new_game_starts_white() {
         let game = new_game();
         assert_eq!(game.state.player, White);
-    }
-
-    #[test]
-    fn test_piece_at_finds_piece() {
-        let a1 = Pos { rank: 0, file: 0 };
-        let a2 = Pos { rank: 1, file: 0 };
-        let b3 = Pos { rank: 2, file: 1 };
-
-        let board = &test_board();
-
-        assert_eq!(piece_at(a1, board), Some((White, Pawn)));
-        assert_eq!(piece_at(a2, board), None);
-        assert_eq!(piece_at(b3, board), Some((Black, King)));
-    }
-
-    #[test]
-    fn test_coords() {
-        let board = &test_board();
-        assert_eq!(
-            ::coords(board),
-            vec![
-                Pos { rank: 0, file: 0 },
-                Pos { rank: 0, file: 1 },
-                Pos { rank: 0, file: 2 },
-                Pos { rank: 1, file: 0 },
-                Pos { rank: 1, file: 1 },
-                Pos { rank: 1, file: 2 },
-                Pos { rank: 2, file: 0 },
-                Pos { rank: 2, file: 1 },
-                Pos { rank: 2, file: 2 },
-            ]
-        );
     }
 
     #[test]
@@ -306,16 +187,8 @@ mod test {
     }
 
     #[test]
-    fn test_get_king_pos() {
-        let board = &test_board();
-
-        assert_eq!(get_king_pos(board, White), Pos { rank: 0, file: 1 });
-        assert_eq!(get_king_pos(board, Black), Pos { rank: 2, file: 1 });
-    }
-
-    #[test]
     fn test_in_check() {
-        let not_in_check_board = Board::from_rows(&[
+        let not_in_check_board = board::BoardMatrix::from_rows(&[
             RowVector3::new(
                 Some((White, Pawn)),
                 Some((White, King)),
@@ -330,11 +203,13 @@ mod test {
         ]);
 
         assert!(!in_check(&State {
-            board: not_in_check_board,
+            board: Board {
+                board: not_in_check_board
+            },
             player: White
         }));
 
-        let in_check_board_1 = Board::from_rows(&[
+        let in_check_board_1 = board::BoardMatrix::from_rows(&[
             RowVector3::new(
                 Some((White, Pawn)),
                 Some((White, King)),
@@ -345,18 +220,22 @@ mod test {
         ]);
 
         assert!(in_check(&State {
-            board: in_check_board_1,
+            board: Board {
+                board: in_check_board_1
+            },
             player: White
         }));
 
-        let in_check_board_2 = Board::from_rows(&[
+        let in_check_board_2 = board::BoardMatrix::from_rows(&[
             RowVector3::new(None, Some((White, King)), Some((White, Pawn))),
             RowVector3::new(Some((White, Pawn)), None, Some((Black, Pawn))),
             RowVector3::new(Some((Black, Pawn)), Some((Black, King)), None),
         ]);
 
         assert!(in_check(&State {
-            board: in_check_board_2,
+            board: Board {
+                board: in_check_board_2
+            },
             player: Black
         }));
     }
