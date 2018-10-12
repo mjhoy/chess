@@ -2,58 +2,33 @@ extern crate nalgebra as na;
 #[macro_use]
 extern crate itertools;
 
-use na::{Matrix, MatrixArray, RowVector3, U3};
+use na::RowVector3;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Player {
-    White,
-    Black,
-}
+pub mod player;
+use player::Player;
+use player::Player::*;
 
-use Player::*;
-
-impl Player {
-    pub fn other(self) -> Player {
-        match self {
-            White => Black,
-            Black => White,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Piece {
-    Pawn,
-    King,
-}
-
+pub mod piece;
+use piece::Piece;
 use Piece::*;
 
-pub type Square = Option<(Player, Piece)>;
+pub mod square;
+use square::Square;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Pos {
-    rank: u8,
-    file: u8,
-}
+pub mod pos;
+use pos::Pos;
 
-#[derive(Debug, Clone, Copy)]
-pub struct State {
-    pub board: Board,
-    pub player: Player,
-}
+pub mod board;
+use board::Board;
 
-/// 3x3 board
-pub type Board = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
+pub mod state;
+use state::State;
 
-pub struct Game {
-    pub state: State,
-}
+pub mod game;
+use game::Game;
 
-pub struct Move {
-    index: (Pos, Pos),
-    pub next: Game,
-}
+pub mod m0ve;
+use m0ve::Move;
 
 fn initial_board() -> Board {
     Board::from_rows(&[
