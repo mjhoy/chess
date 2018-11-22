@@ -36,16 +36,6 @@ pub fn new_game() -> Game {
     Game { state }
 }
 
-/// Pretty print a move.
-pub fn move_str(m0ve: &Move) -> String {
-    let (from, to) = m0ve.index;
-    let from_file = (from.file + b'A') as char;
-    let from_rank = from.rank + 1;
-    let to_file = (to.file + b'A') as char;
-    let to_rank = to.rank + 1;
-    format!("{}{} -> {}{}", from_file, from_rank, to_file, to_rank)
-}
-
 /// Pretty print a player.
 pub fn player_str(player: Player) -> &'static str {
     match player {
