@@ -1,7 +1,7 @@
 use std::io;
 
 extern crate chess;
-use chess::{gen_moves, move_str, new_game, player_str};
+use chess::{move_str, new_game, player_str};
 
 fn main() {
     let mut game = new_game();
@@ -11,7 +11,7 @@ fn main() {
     while !*ended {
         println!("\n{}", game.state.board.str());
 
-        let moves = gen_moves(&game.state);
+        let moves = game.state.gen_moves();
 
         if moves.is_empty() {
             println!("Game over! RET quits.");
