@@ -8,7 +8,6 @@ use player::Player::*;
 
 pub mod piece;
 use piece::Piece;
-use Piece::*;
 
 pub mod square;
 use square::Square;
@@ -26,7 +25,6 @@ pub mod game;
 use game::Game;
 
 pub mod m0ve;
-use m0ve::Move;
 
 /// Initial game.
 pub fn new_game() -> Game {
