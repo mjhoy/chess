@@ -1,7 +1,7 @@
 use std::io;
 
 extern crate chess;
-use chess::{new_game, player_str};
+use chess::new_game;
 
 fn main() {
     let mut game = new_game();
@@ -20,7 +20,7 @@ fn main() {
             break;
         }
 
-        println!("{}'s move.", player_str(game.state.player));
+        println!("{}'s move.", game.state.player);
         for (i, m0ve) in moves.iter().enumerate() {
             println!("{}: {}", i + 1, m0ve);
         }

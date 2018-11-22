@@ -36,14 +36,6 @@ pub fn new_game() -> Game {
     Game { state }
 }
 
-/// Pretty print a player.
-pub fn player_str(player: Player) -> &'static str {
-    match player {
-        White => "White",
-        Black => "Black",
-    }
-}
-
 #[cfg(test)]
 mod test {
     use *;
