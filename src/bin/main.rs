@@ -1,7 +1,7 @@
 use std::io;
 
 extern crate chess;
-use chess::{board_str, gen_moves, move_str, new_game, player_str};
+use chess::new_game;
 
 fn main() {
     let mut game = new_game();
@@ -9,9 +9,9 @@ fn main() {
     let mut buf = String::new();
 
     while !*ended {
-        println!("\n{}", board_str(&game));
+        println!("\n{}", game.state.board.str());
 
-        let moves = gen_moves(&game.state);
+        let moves = game.state.gen_moves();
 
         if moves.is_empty() {
             println!("Game over! RET quits.");
@@ -20,9 +20,9 @@ fn main() {
             break;
         }
 
-        println!("{}'s move.", player_str(game.state.player));
+        println!("{}'s move.", game.state.player);
         for (i, m0ve) in moves.iter().enumerate() {
-            println!("{}: {}", i + 1, move_str(&m0ve));
+            println!("{}: {}", i + 1, m0ve);
         }
 
         println!("Enter 1..{} ('q' quits)", moves.len());
