@@ -3,6 +3,7 @@ name = "chess"
 version = "0.1.0"
 authors = ["Michael Hoy <mjh@mjhoy.com>"]
 autobins = false
+edition = "2018"
 
 [lib]
 name = "chess"
@@ -13,5 +14,5 @@ name = "chess"
 path = "src/bin/main.rs"
 
 [dependencies]
-nalgebra = "0.16.0"
+na = { version = "0.16.0", package = "nalgebra" }
 itertools = "0.7.8"

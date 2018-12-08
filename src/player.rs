@@ -6,7 +6,7 @@ pub enum Player {
     Black,
 }
 
-use Player::*;
+use self::Player::*;
 
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

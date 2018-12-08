@@ -1,10 +1,7 @@
-use board::Board;
-use game::Game;
-use m0ve::Move;
-use piece::Piece::*;
-use player::Player;
-use player::Player::*;
-use pos::Pos;
+use crate::{
+    board::Board, game::Game, m0ve::Move, piece::Piece::*, player::Player, player::Player::*,
+    pos::Pos,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct State {
@@ -101,16 +98,18 @@ impl State {
                         } else {
                             None
                         }
-                    }).collect::<Vec<Move>>()
-            }).collect()
+                    })
+                    .collect::<Vec<Move>>()
+            })
+            .collect()
     }
 }
 
 #[cfg(test)]
 mod test {
-
+    use super::*;
+    use crate::board;
     use na::RowVector3;
-    use *;
 
     fn test_board() -> Board {
         Board::initial()

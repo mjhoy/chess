@@ -1,6 +1,5 @@
 use std::io;
 
-extern crate chess;
 use chess::new_game;
 
 fn main() {
