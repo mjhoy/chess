@@ -1,28 +1,24 @@
-extern crate nalgebra as na;
-#[macro_use]
-extern crate itertools;
-
 pub mod player;
-use player::Player;
-use player::Player::*;
+use crate::player::Player;
+use crate::player::Player::*;
 
 pub mod piece;
-use piece::Piece;
+use crate::piece::Piece;
 
 pub mod square;
-use square::Square;
+use crate::square::Square;
 
 pub mod pos;
-use pos::Pos;
+use crate::pos::Pos;
 
 pub mod board;
-use board::Board;
+use crate::board::Board;
 
 pub mod state;
-use state::State;
+use crate::state::State;
 
 pub mod game;
-use game::Game;
+use crate::game::Game;
 
 pub mod m0ve;
 
@@ -36,7 +32,7 @@ pub fn new_game() -> Game {
 
 #[cfg(test)]
 mod test {
-    use *;
+    use super::*;
 
     #[test]
     fn test_new_game_starts_white() {

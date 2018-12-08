@@ -3,6 +3,7 @@ name = "chess"
 version = "0.1.0"
 authors = ["Michael Hoy <mjh@mjhoy.com>"]
 autobins = false
+edition = "2018"
 
 [lib]
 name = "chess"

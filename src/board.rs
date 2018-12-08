@@ -1,11 +1,12 @@
-extern crate nalgebra as na;
+use itertools::iproduct;
+use nalgebra as na;
 
-use na::{Matrix, MatrixArray, RowVector3, U3};
-use Piece::*;
-use Player;
-use Player::*;
-use Pos;
-use Square;
+use self::na::{Matrix, MatrixArray, RowVector3, U3};
+use crate::Piece::*;
+use crate::Player;
+use crate::Player::*;
+use crate::Pos;
+use crate::Square;
 
 pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 
@@ -38,7 +39,8 @@ impl Board {
             .map(|(rank, file)| Pos {
                 rank: rank as u8,
                 file: file as u8,
-            }).collect()
+            })
+            .collect()
     }
 
     pub fn piece_at(&self, pos: Pos) -> Square {
@@ -98,7 +100,7 @@ impl Board {
 #[cfg(test)]
 mod test {
 
-    use *;
+    use super::*;
 
     #[test]
     fn test_piece_at_finds_piece() {
