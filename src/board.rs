@@ -58,7 +58,8 @@ impl Board {
 
     /// Move the piece at `from_pos` to `to_pos` and return the new board.
     pub fn move_piece(&self, from_pos: Pos, to_pos: Pos) -> Board {
-        let new_board: &mut BoardMatrix = &mut self.board.clone();
+        let mut board = self.board;
+        let new_board: &mut BoardMatrix = &mut board;
         let from = self.piece_at(from_pos);
         new_board[(from_pos.rank as usize, from_pos.file as usize)] = None;
         new_board[(to_pos.rank as usize, to_pos.file as usize)] = from;
