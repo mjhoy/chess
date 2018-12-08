@@ -14,5 +14,5 @@ name = "chess"
 path = "src/bin/main.rs"
 
 [dependencies]
-nalgebra = "0.16.0"
+na = { version = "0.16.0", package = "nalgebra" }
 itertools = "0.7.8"

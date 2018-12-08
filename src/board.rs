@@ -1,8 +1,7 @@
 use itertools::iproduct;
-use nalgebra as na;
 
-use self::na::{Matrix, MatrixArray, RowVector3, U3};
 use crate::{Piece::*, Player, Player::*, Pos, Square};
+use na::{Matrix, MatrixArray, RowVector3, U3};
 
 pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 

@@ -107,11 +107,9 @@ impl State {
 
 #[cfg(test)]
 mod test {
-    use nalgebra as na;
-
-    use self::na::RowVector3;
     use super::*;
     use crate::board;
+    use na::RowVector3;
 
     fn test_board() -> Board {
         Board::initial()
