@@ -1,26 +1,16 @@
-pub mod player;
-use crate::player::Player;
-use crate::player::Player::*;
-
-pub mod piece;
-use crate::piece::Piece;
-
-pub mod square;
-use crate::square::Square;
-
-pub mod pos;
-use crate::pos::Pos;
-
 pub mod board;
-use crate::board::Board;
-
-pub mod state;
-use crate::state::State;
-
 pub mod game;
-use crate::game::Game;
-
 pub mod m0ve;
+pub mod piece;
+pub mod player;
+pub mod pos;
+pub mod square;
+pub mod state;
+
+use crate::{
+    board::Board, game::Game, piece::Piece, player::Player, player::Player::*, pos::Pos,
+    square::Square, state::State,
+};
 
 /// Initial game.
 pub fn new_game() -> Game {

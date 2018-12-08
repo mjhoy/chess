@@ -1,5 +1,4 @@
-use crate::game::Game;
-use crate::pos::Pos;
+use crate::{game::Game, pos::Pos};
 use std::fmt;
 
 pub struct Move {

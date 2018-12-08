@@ -1,10 +1,7 @@
-use crate::board::Board;
-use crate::game::Game;
-use crate::m0ve::Move;
-use crate::piece::Piece::*;
-use crate::player::Player;
-use crate::player::Player::*;
-use crate::pos::Pos;
+use crate::{
+    board::Board, game::Game, m0ve::Move, piece::Piece::*, player::Player, player::Player::*,
+    pos::Pos,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct State {

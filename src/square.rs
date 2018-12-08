@@ -1,4 +1,3 @@
-use crate::piece::Piece;
-use crate::player::Player;
+use crate::{piece::Piece, player::Player};
 
 pub type Square = Option<(Player, Piece)>;
