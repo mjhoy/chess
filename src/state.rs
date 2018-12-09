@@ -152,7 +152,7 @@ mod test {
             Some((Black, Pawn)),
         ];
         let not_in_check_state = State {
-            board: Board::from_squares(not_in_check_board),
+            board: Board::from_squares(not_in_check_board.as_slice()),
             player: White,
         };
 
@@ -174,7 +174,7 @@ mod test {
         ];
 
         let in_check_state_1 = State {
-            board: Board::from_squares(in_check_board_1),
+            board: Board::from_squares(in_check_board_1.as_slice()),
             player: White,
         };
         assert!(in_check_state_1.in_check());
@@ -195,7 +195,7 @@ mod test {
         ];
 
         let in_check_state_2 = State {
-            board: Board::from_squares(in_check_board_2),
+            board: Board::from_squares(in_check_board_2.as_slice()),
             player: Black,
         };
         assert!(in_check_state_2.in_check());

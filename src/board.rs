@@ -29,9 +29,9 @@ impl Board {
         Board { board }
     }
 
-    pub fn from_squares(squares: Vec<Square>) -> Board {
+    pub fn from_squares(squares: &[Square]) -> Board {
         Board {
-            board: BoardMatrix::from_row_slice_generic(U3, U3, squares.as_slice()),
+            board: BoardMatrix::from_row_slice_generic(U3, U3, squares),
         }
     }
 
@@ -161,7 +161,7 @@ mod test {
             Some((Black, Pawn)),
         ];
 
-        let board = Board::from_squares(board_squares);
+        let board = Board::from_squares(board_squares.as_slice());
 
         assert_eq!(
             board.piece_at(Pos { rank: 0, file: 0 }),
