@@ -1,42 +1,44 @@
 use itertools::iproduct;
 
 use crate::{Piece::*, Player, Player::*, Pos, Square};
-use na::{Matrix, MatrixArray, RowVector3, U3};
 
-pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
+pub type BoardMatrix = Vec<Square>;
+
+const NSIZE: u8 = 3;
 
 /// 3x3 board
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Board {
     inner: BoardMatrix,
 }
 
 impl Board {
     pub fn initial() -> Board {
-        let inner = BoardMatrix::from_rows(&[
-            RowVector3::new(
-                Some((White, Pawn)),
-                Some((White, King)),
-                Some((White, Pawn)),
-            ),
-            RowVector3::new(None, None, None),
-            RowVector3::new(
-                Some((Black, Pawn)),
-                Some((Black, King)),
-                Some((Black, Pawn)),
-            ),
-        ]);
+        let inner = vec![
+            // rank 1
+            Some((White, Pawn)),
+            Some((White, King)),
+            Some((White, Pawn)),
+            // rank 2
+            None,
+            None,
+            None,
+            // rank 3
+            Some((Black, Pawn)),
+            Some((Black, King)),
+            Some((Black, Pawn)),
+        ];
         Board { inner }
     }
 
     pub fn from_squares(squares: &[Square]) -> Board {
         Board {
-            inner: BoardMatrix::from_row_slice_generic(U3, U3, squares),
+            inner: squares.to_vec(),
         }
     }
 
     pub fn coords(&self) -> Vec<Pos> {
-        iproduct!(0..self.inner.nrows(), 0..self.inner.ncols())
+        iproduct!(0..NSIZE, 0..NSIZE)
             .map(|(rank, file)| Pos {
                 rank: rank as u8,
                 file: file as u8,
@@ -45,7 +47,7 @@ impl Board {
     }
 
     pub fn piece_at(&self, pos: Pos) -> Square {
-        self.inner.row(pos.rank as usize)[pos.file as usize]
+        self.inner[pos.to_offset(NSIZE)]
     }
 
     /// Find the position of the king for `player`. Panics if no king is
@@ -64,13 +66,14 @@ impl Board {
 
     /// Move the piece at `from_pos` to `to_pos` and return the new board.
     pub fn move_piece(&self, from_pos: Pos, to_pos: Pos) -> Board {
-        let mut inner = self.inner;
-        let new_inner: &mut BoardMatrix = &mut inner;
+        let new_inner: &mut BoardMatrix = &mut self.inner.clone();
         let from = self.piece_at(from_pos);
-        new_inner[(from_pos.rank as usize, from_pos.file as usize)] = None;
-        new_inner[(to_pos.rank as usize, to_pos.file as usize)] = from;
+        new_inner[from_pos.to_offset(NSIZE)] = None;
+        new_inner[to_pos.to_offset(NSIZE)] = from;
 
-        Board { inner: *new_inner }
+        Board {
+            inner: new_inner.to_vec(),
+        }
     }
 
     pub fn str(&self) -> String {
@@ -87,10 +90,13 @@ impl Board {
 
         let mut buf = String::new();
 
-        for rowi in (0..self.inner.nrows()).rev() {
-            let row = self.inner.row(rowi);
-            for piece in row.iter() {
-                buf.push_str(&piece_str(*piece));
+        for rowi in (0..NSIZE).rev() {
+            for coli in 0..NSIZE {
+                let pos = Pos {
+                    rank: rowi,
+                    file: coli,
+                };
+                buf.push_str(&piece_str(self.inner[pos.to_offset(NSIZE)]));
             }
             buf.push_str("\n");
         }
