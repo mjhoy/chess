@@ -108,8 +108,6 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::board;
-    use na::RowVector3;
 
     fn test_board() -> Board {
         Board::initial()
@@ -142,56 +140,62 @@ mod test {
 
     #[test]
     fn test_in_check() {
-        let not_in_check_board = board::BoardMatrix::from_rows(&[
-            RowVector3::new(
-                Some((White, Pawn)),
-                Some((White, King)),
-                Some((White, Pawn)),
-            ),
-            RowVector3::new(None, None, None),
-            RowVector3::new(
-                Some((Black, Pawn)),
-                Some((Black, King)),
-                Some((Black, Pawn)),
-            ),
-        ]);
+        let not_in_check_board = vec![
+            Some((White, Pawn)),
+            Some((White, King)),
+            Some((White, Pawn)),
+            None,
+            None,
+            None,
+            Some((Black, Pawn)),
+            Some((Black, King)),
+            Some((Black, Pawn)),
+        ];
         let not_in_check_state = State {
-            board: Board {
-                board: not_in_check_board,
-            },
+            board: Board::from_squares(not_in_check_board.as_slice()),
             player: White,
         };
 
         assert!(!not_in_check_state.in_check());
 
-        let in_check_board_1 = board::BoardMatrix::from_rows(&[
-            RowVector3::new(
-                Some((White, Pawn)),
-                Some((White, King)),
-                Some((White, Pawn)),
-            ),
-            RowVector3::new(Some((Black, Pawn)), None, None),
-            RowVector3::new(None, Some((Black, King)), Some((Black, Pawn))),
-        ]);
+        let in_check_board_1 = vec![
+            // rank 1
+            Some((White, Pawn)),
+            Some((White, King)),
+            Some((White, Pawn)),
+            // rank 2
+            Some((Black, Pawn)),
+            None,
+            None,
+            // rank 3
+            None,
+            Some((Black, King)),
+            Some((Black, Pawn)),
+        ];
 
         let in_check_state_1 = State {
-            board: Board {
-                board: in_check_board_1,
-            },
+            board: Board::from_squares(in_check_board_1.as_slice()),
             player: White,
         };
         assert!(in_check_state_1.in_check());
 
-        let in_check_board_2 = board::BoardMatrix::from_rows(&[
-            RowVector3::new(None, Some((White, King)), Some((White, Pawn))),
-            RowVector3::new(Some((White, Pawn)), None, Some((Black, Pawn))),
-            RowVector3::new(Some((Black, Pawn)), Some((Black, King)), None),
-        ]);
+        let in_check_board_2 = vec![
+            // rank 1
+            None,
+            Some((White, King)),
+            Some((White, Pawn)),
+            // rank 2
+            Some((White, Pawn)),
+            None,
+            Some((Black, Pawn)),
+            // rank 3
+            Some((Black, Pawn)),
+            Some((Black, King)),
+            None,
+        ];
 
         let in_check_state_2 = State {
-            board: Board {
-                board: in_check_board_2,
-            },
+            board: Board::from_squares(in_check_board_2.as_slice()),
             player: Black,
         };
         assert!(in_check_state_2.in_check());

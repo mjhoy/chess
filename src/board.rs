@@ -8,7 +8,7 @@ pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 /// 3x3 board
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
-    pub board: BoardMatrix,
+    board: BoardMatrix,
 }
 
 impl Board {
@@ -27,6 +27,12 @@ impl Board {
             ),
         ]);
         Board { board }
+    }
+
+    pub fn from_squares(squares: &[Square]) -> Board {
+        Board {
+            board: BoardMatrix::from_row_slice_generic(U3, U3, squares),
+        }
     }
 
     pub fn coords(&self) -> Vec<Pos> {
@@ -136,5 +142,39 @@ mod test {
 
         assert_eq!(board.get_king_pos(White), Pos { rank: 0, file: 1 });
         assert_eq!(board.get_king_pos(Black), Pos { rank: 2, file: 1 });
+    }
+
+    #[test]
+    fn test_from_squares_in_row_major_order() {
+        let board_squares = vec![
+            // rank 1
+            Some((White, Pawn)),
+            Some((White, King)),
+            Some((White, Pawn)),
+            // rank 2
+            Some((Black, Pawn)),
+            None,
+            None,
+            // rank 3
+            None,
+            Some((Black, King)),
+            Some((Black, Pawn)),
+        ];
+
+        let board = Board::from_squares(board_squares.as_slice());
+
+        assert_eq!(
+            board.piece_at(Pos { rank: 0, file: 0 }),
+            Some((White, Pawn))
+        );
+        assert_eq!(
+            board.piece_at(Pos { rank: 1, file: 0 }),
+            Some((Black, Pawn))
+        );
+        assert_eq!(board.piece_at(Pos { rank: 2, file: 0 }), None,);
+        assert_eq!(
+            board.piece_at(Pos { rank: 2, file: 1 }),
+            Some((Black, King))
+        );
     }
 }
