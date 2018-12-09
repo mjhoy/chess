@@ -8,7 +8,7 @@ pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 /// 3x3 board
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
-    pub board: BoardMatrix,
+    board: BoardMatrix,
 }
 
 impl Board {
