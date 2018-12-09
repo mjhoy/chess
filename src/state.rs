@@ -3,7 +3,7 @@ use crate::{
     pos::Pos,
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct State {
     pub board: Board,
     pub player: Player,
@@ -14,7 +14,7 @@ impl State {
     pub fn in_check(&self) -> bool {
         let to_pos = self.board.get_king_pos(self.player);
         let next_move_state = State {
-            board: self.board,
+            board: self.board.clone(),
             player: self.player.other(),
         };
 
@@ -115,7 +115,7 @@ mod test {
 
     #[test]
     fn test_can_move_pseudo() {
-        let board = &test_board();
+        let board = test_board();
         let a1 = Pos { rank: 0, file: 0 };
         let a2 = Pos { rank: 1, file: 0 };
         let a3 = Pos { rank: 2, file: 0 };
@@ -123,11 +123,11 @@ mod test {
         let b3 = Pos { rank: 2, file: 1 };
 
         let white_move = State {
-            board: *board,
+            board: board.clone(),
             player: White,
         };
         let black_move = State {
-            board: *board,
+            board: board.clone(),
             player: Black,
         };
 
