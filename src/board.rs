@@ -8,12 +8,12 @@ pub type BoardMatrix = Matrix<Square, U3, U3, MatrixArray<Square, U3, U3>>;
 /// 3x3 board
 #[derive(Debug, Clone, Copy)]
 pub struct Board {
-    board: BoardMatrix,
+    inner: BoardMatrix,
 }
 
 impl Board {
     pub fn initial() -> Board {
-        let board = BoardMatrix::from_rows(&[
+        let inner = BoardMatrix::from_rows(&[
             RowVector3::new(
                 Some((White, Pawn)),
                 Some((White, King)),
@@ -26,17 +26,17 @@ impl Board {
                 Some((Black, Pawn)),
             ),
         ]);
-        Board { board }
+        Board { inner }
     }
 
     pub fn from_squares(squares: &[Square]) -> Board {
         Board {
-            board: BoardMatrix::from_row_slice_generic(U3, U3, squares),
+            inner: BoardMatrix::from_row_slice_generic(U3, U3, squares),
         }
     }
 
     pub fn coords(&self) -> Vec<Pos> {
-        iproduct!(0..self.board.nrows(), 0..self.board.ncols())
+        iproduct!(0..self.inner.nrows(), 0..self.inner.ncols())
             .map(|(rank, file)| Pos {
                 rank: rank as u8,
                 file: file as u8,
@@ -45,7 +45,7 @@ impl Board {
     }
 
     pub fn piece_at(&self, pos: Pos) -> Square {
-        self.board.row(pos.rank as usize)[pos.file as usize]
+        self.inner.row(pos.rank as usize)[pos.file as usize]
     }
 
     /// Find the position of the king for `player`. Panics if no king is
@@ -64,13 +64,13 @@ impl Board {
 
     /// Move the piece at `from_pos` to `to_pos` and return the new board.
     pub fn move_piece(&self, from_pos: Pos, to_pos: Pos) -> Board {
-        let mut board = self.board;
-        let new_board: &mut BoardMatrix = &mut board;
+        let mut inner = self.inner;
+        let new_inner: &mut BoardMatrix = &mut inner;
         let from = self.piece_at(from_pos);
-        new_board[(from_pos.rank as usize, from_pos.file as usize)] = None;
-        new_board[(to_pos.rank as usize, to_pos.file as usize)] = from;
+        new_inner[(from_pos.rank as usize, from_pos.file as usize)] = None;
+        new_inner[(to_pos.rank as usize, to_pos.file as usize)] = from;
 
-        Board { board: *new_board }
+        Board { inner: *new_inner }
     }
 
     pub fn str(&self) -> String {
@@ -87,8 +87,8 @@ impl Board {
 
         let mut buf = String::new();
 
-        for rowi in (0..self.board.nrows()).rev() {
-            let row = self.board.row(rowi);
+        for rowi in (0..self.inner.nrows()).rev() {
+            let row = self.inner.row(rowi);
             for piece in row.iter() {
                 buf.push_str(&piece_str(*piece));
             }
