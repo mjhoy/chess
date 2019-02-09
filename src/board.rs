@@ -91,14 +91,19 @@ impl Board {
         let mut buf = String::new();
 
         for rowi in (0..NSIZE).rev() {
+            buf.push_str(&format!("{}", rowi + 1));
             for coli in 0..NSIZE {
                 let pos = Pos {
                     rank: rowi,
                     file: coli,
                 };
-                buf.push_str(&piece_str(self.inner[pos.to_offset(NSIZE)]));
+                buf.push_str(&format!("{} ", piece_str(self.inner[pos.to_offset(NSIZE)])));
             }
             buf.push_str("\n");
+        }
+        buf.push_str(" ");
+        for coli in 0..NSIZE {
+            buf.push_str(&format!("{} ", (coli + b'A') as char));
         }
 
         buf
