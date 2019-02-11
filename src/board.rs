@@ -4,7 +4,7 @@ use crate::{Piece::*, Player, Player::*, Pos, Square};
 
 pub type BoardMatrix = Vec<Square>;
 
-const NSIZE: u8 = 3;
+const NSIZE: u8 = 8;
 
 /// 3x3 board
 #[derive(Debug, Clone)]
@@ -16,17 +16,77 @@ impl Board {
     pub fn initial() -> Board {
         let inner = vec![
             // rank 1
-            Some((White, Pawn)),
+            None,
+            None,
+            None,
+            None,
             Some((White, King)),
-            Some((White, Pawn)),
+            None,
+            None,
+            None,
             // rank 2
-            None,
-            None,
-            None,
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
+            Some((White, Pawn)),
             // rank 3
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
             Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            Some((Black, Pawn)),
+            // rank 8
+            None,
+            None,
+            None,
+            None,
             Some((Black, King)),
-            Some((Black, Pawn)),
+            None,
+            None,
+            None,
         ];
         Board { inner }
     }
@@ -117,75 +177,22 @@ mod test {
 
     #[test]
     fn test_piece_at_finds_piece() {
-        let a1 = Pos { rank: 0, file: 0 };
-        let a2 = Pos { rank: 1, file: 0 };
+        let e2 = Pos { rank: 1, file: 4 };
+        let e1 = Pos { rank: 0, file: 4 };
         let b3 = Pos { rank: 2, file: 1 };
 
         let board = Board::initial();
 
-        assert_eq!(board.piece_at(a1), Some((White, Pawn)));
-        assert_eq!(board.piece_at(a2), None);
-        assert_eq!(board.piece_at(b3), Some((Black, King)));
-    }
-
-    #[test]
-    fn test_coords() {
-        let board = Board::initial();
-        assert_eq!(
-            board.coords(),
-            vec![
-                Pos { rank: 0, file: 0 },
-                Pos { rank: 0, file: 1 },
-                Pos { rank: 0, file: 2 },
-                Pos { rank: 1, file: 0 },
-                Pos { rank: 1, file: 1 },
-                Pos { rank: 1, file: 2 },
-                Pos { rank: 2, file: 0 },
-                Pos { rank: 2, file: 1 },
-                Pos { rank: 2, file: 2 },
-            ]
-        );
+        assert_eq!(board.piece_at(e2), Some((White, Pawn)));
+        assert_eq!(board.piece_at(e1), Some((White, King)));
+        assert_eq!(board.piece_at(b3), None);
     }
 
     #[test]
     fn test_get_king_pos() {
         let board = Board::initial();
 
-        assert_eq!(board.get_king_pos(White), Pos { rank: 0, file: 1 });
-        assert_eq!(board.get_king_pos(Black), Pos { rank: 2, file: 1 });
-    }
-
-    #[test]
-    fn test_from_squares_in_row_major_order() {
-        let board_squares = vec![
-            // rank 1
-            Some((White, Pawn)),
-            Some((White, King)),
-            Some((White, Pawn)),
-            // rank 2
-            Some((Black, Pawn)),
-            None,
-            None,
-            // rank 3
-            None,
-            Some((Black, King)),
-            Some((Black, Pawn)),
-        ];
-
-        let board = Board::from_squares(board_squares.as_slice());
-
-        assert_eq!(
-            board.piece_at(Pos { rank: 0, file: 0 }),
-            Some((White, Pawn))
-        );
-        assert_eq!(
-            board.piece_at(Pos { rank: 1, file: 0 }),
-            Some((Black, Pawn))
-        );
-        assert_eq!(board.piece_at(Pos { rank: 2, file: 0 }), None,);
-        assert_eq!(
-            board.piece_at(Pos { rank: 2, file: 1 }),
-            Some((Black, King))
-        );
+        assert_eq!(board.get_king_pos(White), Pos { rank: 0, file: 4 });
+        assert_eq!(board.get_king_pos(Black), Pos { rank: 7, file: 4 });
     }
 }

@@ -116,11 +116,14 @@ mod test {
     #[test]
     fn test_can_move_pseudo() {
         let board = test_board();
+        let e2 = Pos { rank: 1, file: 4 };
+        let e3 = Pos { rank: 2, file: 4 };
         let a1 = Pos { rank: 0, file: 0 };
         let a2 = Pos { rank: 1, file: 0 };
         let a3 = Pos { rank: 2, file: 0 };
         let b2 = Pos { rank: 1, file: 1 };
-        let b3 = Pos { rank: 2, file: 1 };
+        let b7 = Pos { rank: 6, file: 1 };
+        let b6 = Pos { rank: 5, file: 1 };
 
         let white_move = State {
             board: board.clone(),
@@ -131,25 +134,87 @@ mod test {
             player: Black,
         };
 
-        assert!(white_move.can_move_pseudo(a1, a2));
+        assert!(white_move.can_move_pseudo(e2, e3));
         assert!(!white_move.can_move_pseudo(a1, a3));
-        assert!(!white_move.can_move_pseudo(b3, b2));
-        assert!(black_move.can_move_pseudo(b3, b2));
-        assert!(black_move.can_move_pseudo(b3, a2));
+        assert!(!white_move.can_move_pseudo(b7, b6));
+        assert!(black_move.can_move_pseudo(b7, b6));
     }
 
     #[test]
     fn test_in_check() {
         let not_in_check_board = vec![
+            // rank 1
             Some((White, Pawn)),
             Some((White, King)),
             Some((White, Pawn)),
             None,
             None,
             None,
+            None,
+            None,
+            // rank 2
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 3
             Some((Black, Pawn)),
             Some((Black, King)),
             Some((Black, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 8
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         ];
         let not_in_check_state = State {
             board: Board::from_squares(not_in_check_board.as_slice()),
@@ -163,14 +228,74 @@ mod test {
             Some((White, Pawn)),
             Some((White, King)),
             Some((White, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
             // rank 2
             Some((Black, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
             None,
             None,
             // rank 3
             None,
             Some((Black, King)),
             Some((Black, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 8
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
         ];
 
         let in_check_state_1 = State {
@@ -184,13 +309,73 @@ mod test {
             None,
             Some((White, King)),
             Some((White, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
             // rank 2
             Some((White, Pawn)),
             None,
             Some((Black, Pawn)),
+            None,
+            None,
+            None,
+            None,
+            None,
             // rank 3
             Some((Black, Pawn)),
             Some((Black, King)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 8
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
             None,
         ];
 
