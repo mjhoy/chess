@@ -119,9 +119,7 @@ mod test {
         let e2 = Pos { rank: 1, file: 4 };
         let e3 = Pos { rank: 2, file: 4 };
         let a1 = Pos { rank: 0, file: 0 };
-        let a2 = Pos { rank: 1, file: 0 };
         let a3 = Pos { rank: 2, file: 0 };
-        let b2 = Pos { rank: 1, file: 1 };
         let b7 = Pos { rank: 6, file: 1 };
         let b6 = Pos { rank: 5, file: 1 };
 
