@@ -10,10 +10,12 @@ pub struct MoveDescription {
     pub dst_pos: Pos,
 }
 
-pub fn parse_move_description(input: &str) -> Result<MoveDescription, String> {
-    match parser::move_description(input) {
-        Ok((_, md)) => Ok(md),
-        Err(e) => Err(format!("parsing error: {:?}", e)),
+impl MoveDescription {
+    pub fn parse(input: &str) -> Result<MoveDescription, String> {
+        match parser::move_description(input) {
+            Ok((_, md)) => Ok(md),
+            Err(e) => Err(format!("parsing error: {:?}", e)),
+        }
     }
 }
 
@@ -24,14 +26,14 @@ mod test {
     #[test]
     fn test_parse_move_description() {
         assert_eq!(
-            parse_move_description("Ke2"),
+            MoveDescription::parse("Ke2"),
             Ok(MoveDescription {
                 src_piece: Piece::King,
                 dst_pos: Pos { file: 4, rank: 1 }
             })
         );
         assert_eq!(
-            parse_move_description("Ze2"),
+            MoveDescription::parse("Ze2"),
             Err(r#"parsing error: Error(Code("Ze2", Alt))"#.to_string())
         );
     }
