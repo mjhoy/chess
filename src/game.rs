@@ -2,6 +2,7 @@ use crate::board::Board;
 use crate::player::Player::*;
 use crate::state::State;
 
+#[derive(Clone)]
 pub struct Game {
     pub state: State,
 }
