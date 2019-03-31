@@ -1,6 +1,6 @@
 use itertools::iproduct;
 
-use crate::{Piece::*, Player, Player::*, Pos, Square};
+use crate::{piece::Piece::*, player::Player, player::Player::*, pos::Pos, square::Square};
 
 pub type BoardMatrix = Vec<Square>;
 
