@@ -1,7 +1,6 @@
 use crate::{game::Game, pos::Pos};
 use std::fmt;
 
-#[derive(Clone)]
 pub struct Move {
     pub index: (Pos, Pos),
     pub next: Game,
