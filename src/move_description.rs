@@ -14,7 +14,10 @@ pub struct MoveDescription {
 impl MoveDescription {
     pub fn parse(input: &str) -> Result<MoveDescription, String> {
         match parser::move_description(input) {
-            Ok((_, md)) => Ok(md),
+            Ok((ref rem, ref _md)) if !rem.is_empty() => {
+                Err(format!("parsing error: extra characters"))
+            }
+            Ok((_remaining, md)) => Ok(md),
             Err(e) => Err(format!("parsing error: {:?}", e)),
         }
     }
@@ -58,6 +61,10 @@ mod test {
         assert_eq!(
             MoveDescription::parse("Ze2"),
             Err(r#"parsing error: Error(Code("Ze2", Alt))"#.to_string())
+        );
+        assert_eq!(
+            MoveDescription::parse("Ke2junk"),
+            Err(r#"parsing error: extra characters"#.to_string())
         );
     }
 
