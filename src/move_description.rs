@@ -68,7 +68,7 @@ mod test {
     #[test]
     fn test_match_moves() {
         let mut game = test_game();
-        for desc in vec!["e3", "e6", "Ke2", "e5", "Kd3", "e4"] {
+        for desc in &["e3", "e6", "Ke2", "e5", "Kd3", "e4"] {
             let next_moves = game.state.gen_moves();
             let move_desc = MoveDescription::parse(desc).unwrap();
             game = move_desc.match_moves(next_moves).unwrap().next;
