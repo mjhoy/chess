@@ -15,7 +15,7 @@ impl MoveDescription {
     pub fn parse(input: &str) -> Result<MoveDescription, String> {
         match parser::move_description(input) {
             Ok((ref rem, ref _md)) if !rem.is_empty() => {
-                Err(format!("parsing error: extra characters"))
+                Err("parsing error: extra characters".to_string())
             }
             Ok((_remaining, md)) => Ok(md),
             Err(e) => Err(format!("parsing error: {:?}", e)),
