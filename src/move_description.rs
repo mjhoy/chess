@@ -62,7 +62,7 @@ mod test {
     }
 
     fn test_game() -> Game {
-        Game::initial()
+        Game::default()
     }
 
     #[test]

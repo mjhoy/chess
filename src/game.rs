@@ -6,8 +6,8 @@ pub struct Game {
     pub state: State,
 }
 
-impl Game {
-    pub fn initial() -> Game {
+impl Default for Game {
+    fn default() -> Self {
         let board = Board::initial();
         let player = White;
         let state = State { board, player };
