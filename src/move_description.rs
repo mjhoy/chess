@@ -22,7 +22,7 @@ impl MoveDescription {
     pub fn match_moves(&self, moves: Vec<Move>) -> Option<Move> {
         for m0ve in moves {
             if self.match_move(&m0ve) {
-                return Some(m0ve.clone());
+                return Some(m0ve);
             }
         }
         None
