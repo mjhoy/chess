@@ -1,5 +1,6 @@
 use std::io;
 
+use chess::move_description::MoveDescription;
 use chess::new_game;
 
 fn main() {
@@ -20,11 +21,8 @@ fn main() {
         }
 
         println!("{}'s move.", game.state.player);
-        for (i, m0ve) in moves.iter().enumerate() {
-            println!("{}: {}", i + 1, m0ve);
-        }
 
-        println!("Enter 1..{} ('q' quits)", moves.len());
+        println!("Please enter a move, or 'q' quits.");
 
         io::stdin().read_line(&mut buf).unwrap();
 
@@ -33,16 +31,15 @@ fn main() {
             break;
         }
 
-        match buf.trim().parse::<usize>() {
-            Ok(i) => {
-                if i <= moves.len() && i > 0 {
-                    game = moves.into_iter().nth(i - 1).expect("checked index").next;
-                } else {
-                    println!("Please enter a number between 1 and {}.", moves.len());
+        match MoveDescription::parse(buf.trim()) {
+            Ok(move_description) => match move_description.match_moves(moves) {
+                Some(m0ve) => {
+                    game = m0ve.next;
                 }
-            }
+                None => println!("Can't make that move!"),
+            },
             Err(_) => {
-                println!("Please enter a number between 1 and {}.", moves.len());
+                println!("Sorry, that doesn't describe a move!");
             }
         }
 
