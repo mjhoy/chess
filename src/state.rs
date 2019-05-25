@@ -165,9 +165,92 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::piece::Piece;
 
     fn test_board() -> Board {
         Board::initial()
+    }
+
+    fn test_simple_board_for_piece_lateral_king(piece: Piece) -> Board {
+        // White king at d4, black king at b7, and white's variable
+        // piece at c4. E.g., the queen on this board:
+        // https://lichess.org/analysis/standard/8/1k6/8/8/2QK4/8/8/8_w_-_-
+        let inner = vec![
+            // rank 1
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 2
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 3
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            Some((White, piece)),
+            Some((White, King)),
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
+            None,
+            Some((Black, King)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 8
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ];
+
+        Board::from_squares(&inner)
     }
 
     #[test]
@@ -193,6 +276,26 @@ mod test {
         assert!(!white_move.can_move_pseudo(a1, a3));
         assert!(!white_move.can_move_pseudo(b7, b6));
         assert!(black_move.can_move_pseudo(b7, b6));
+    }
+
+    #[test]
+    fn test_rook_moves() {
+        let board = test_simple_board_for_piece_lateral_king(Piece::Rook);
+        let a4 = Pos { rank: 3, file: 0 };
+        let c1 = Pos { rank: 0, file: 2 };
+        let c4 = Pos { rank: 3, file: 2 };
+        let c7 = Pos { rank: 6, file: 2 };
+        let h4 = Pos { rank: 3, file: 7 };
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, c1));
+        assert!(white_move.can_move(c4, c7));
+        assert!(white_move.can_move(c4, a4));
+        assert!(!white_move.can_move(c4, h4)); // can't move through the king
     }
 
     #[test]
