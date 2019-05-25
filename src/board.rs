@@ -16,14 +16,14 @@ impl Board {
     pub fn initial() -> Board {
         let inner = vec![
             // rank 1
-            None,
+            Some((White, Rook)),
             None,
             None,
             None,
             Some((White, King)),
             None,
             None,
-            None,
+            Some((White, Rook)),
             // rank 2
             Some((White, Pawn)),
             Some((White, Pawn)),
@@ -79,14 +79,14 @@ impl Board {
             Some((Black, Pawn)),
             Some((Black, Pawn)),
             // rank 8
-            None,
+            Some((Black, Rook)),
             None,
             None,
             None,
             Some((Black, King)),
             None,
             None,
-            None,
+            Some((Black, Rook)),
         ];
         Board { inner }
     }
@@ -142,8 +142,10 @@ impl Board {
                 None => " ",
                 Some((White, Pawn)) => "♙",
                 Some((White, King)) => "♔",
+                Some((White, Rook)) => "♖",
                 Some((Black, Pawn)) => "♟",
                 Some((Black, King)) => "♚",
+                Some((Black, Rook)) => "♜",
             };
             piece_str.to_string()
         }

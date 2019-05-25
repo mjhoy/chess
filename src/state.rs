@@ -48,6 +48,62 @@ impl State {
                 && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
         }
 
+        fn can_move_rook(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            can_move_laterally(_player, board, from_pos, to_pos)
+        }
+
+        fn can_move_laterally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            if from_pos == to_pos {
+                return false;
+            }
+
+            if to_pos.file == from_pos.file {
+                let range = if to_pos.rank > from_pos.rank {
+                    (from_pos.rank + 1)..to_pos.rank
+                } else {
+                    (to_pos.rank + 1)..from_pos.rank
+                };
+
+                for next_rank in range {
+                    let next_pos = Pos {
+                        rank: next_rank,
+                        file: to_pos.file,
+                    };
+                    if board.piece_at(next_pos).is_some() {
+                        return false;
+                    }
+                }
+
+                true
+            } else if to_pos.rank == from_pos.rank {
+                let range = if to_pos.file > from_pos.file {
+                    (from_pos.file + 1)..to_pos.file
+                } else {
+                    (to_pos.file + 1)..from_pos.file
+                };
+
+                for next_file in range {
+                    let next_pos = Pos {
+                        rank: to_pos.rank,
+                        file: next_file,
+                    };
+                    if board.piece_at(next_pos).is_some() {
+                        return false;
+                    }
+                }
+
+                true
+            } else {
+                false
+            }
+        }
+
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
@@ -57,6 +113,7 @@ impl State {
                 _ => match piece {
                     Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
                     King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
+                    Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
                 },
             },
             _ => false,

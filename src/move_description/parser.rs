@@ -7,6 +7,7 @@ named!(
     piece<&str, Piece>,
     alt!(
         value!(Piece::King, tag!("K")) |
+        value!(Piece::Rook, tag!("R")) |
         value!(Piece::Pawn, tag!(""))
     )
 );
