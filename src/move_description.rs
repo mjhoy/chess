@@ -48,6 +48,7 @@ mod test {
     use super::*;
     use crate::game::Game;
     use crate::player::Player;
+    use crate::pos::*;
 
     #[test]
     fn test_parse() {
@@ -55,7 +56,7 @@ mod test {
             MoveDescription::parse("Ke2"),
             Ok(MoveDescription {
                 src_piece: Piece::King,
-                dst_pos: Pos { file: 4, rank: 1 }
+                dst_pos: e2,
             })
         );
         assert_eq!(
@@ -81,15 +82,13 @@ mod test {
             game = move_desc.match_moves(next_moves).unwrap().next;
         }
 
-        let d3 = MoveDescription::parse("d3").unwrap();
         assert_eq!(
-            game.state.board.piece_at(d3.dst_pos),
+            game.state.board.piece_at(d3),
             Some((Player::White, Piece::King))
         );
 
-        let e4 = MoveDescription::parse("e4").unwrap();
         assert_eq!(
-            game.state.board.piece_at(e4.dst_pos),
+            game.state.board.piece_at(e4),
             Some((Player::Black, Piece::Pawn))
         );
     }

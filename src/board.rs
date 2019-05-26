@@ -176,13 +176,10 @@ impl Board {
 mod test {
 
     use super::*;
+    use crate::pos::*;
 
     #[test]
     fn test_piece_at_finds_piece() {
-        let e2 = Pos { rank: 1, file: 4 };
-        let e1 = Pos { rank: 0, file: 4 };
-        let b3 = Pos { rank: 2, file: 1 };
-
         let board = Board::initial();
 
         assert_eq!(board.piece_at(e2), Some((White, Pawn)));
@@ -194,7 +191,7 @@ mod test {
     fn test_get_king_pos() {
         let board = Board::initial();
 
-        assert_eq!(board.get_king_pos(White), Pos { rank: 0, file: 4 });
-        assert_eq!(board.get_king_pos(Black), Pos { rank: 7, file: 4 });
+        assert_eq!(board.get_king_pos(White), e1);
+        assert_eq!(board.get_king_pos(Black), e8);
     }
 }

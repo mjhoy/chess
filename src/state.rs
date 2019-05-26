@@ -166,6 +166,7 @@ impl State {
 mod test {
     use super::*;
     use crate::piece::Piece;
+    use crate::pos::*;
 
     fn test_board() -> Board {
         Board::initial()
@@ -256,12 +257,6 @@ mod test {
     #[test]
     fn test_can_move_pseudo() {
         let board = test_board();
-        let a1 = Pos { rank: 0, file: 0 };
-        let a3 = Pos { rank: 2, file: 0 };
-        let b6 = Pos { rank: 5, file: 1 };
-        let b7 = Pos { rank: 6, file: 1 };
-        let e2 = Pos { rank: 1, file: 4 };
-        let e3 = Pos { rank: 2, file: 4 };
 
         let white_move = State {
             board: board.clone(),
@@ -281,11 +276,6 @@ mod test {
     #[test]
     fn test_rook_moves() {
         let board = test_simple_board_for_piece_lateral_king(Piece::Rook);
-        let a4 = Pos { rank: 3, file: 0 };
-        let c1 = Pos { rank: 0, file: 2 };
-        let c4 = Pos { rank: 3, file: 2 };
-        let c7 = Pos { rank: 6, file: 2 };
-        let h4 = Pos { rank: 3, file: 7 };
 
         let white_move = State {
             board,

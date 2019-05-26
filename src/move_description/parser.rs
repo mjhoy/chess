@@ -64,6 +64,7 @@ named!(
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::pos::*;
     use nom::Context::Code;
     use nom::Err::Error;
     use nom::ErrorKind;
@@ -90,9 +91,9 @@ mod test {
 
     #[test]
     fn parse_pos() {
-        assert_eq!(pos("e2"), Ok(("", Pos { file: 4, rank: 1 })));
-        assert_eq!(pos("a1"), Ok(("", Pos { file: 0, rank: 0 })));
-        assert_eq!(pos("h7"), Ok(("", Pos { file: 7, rank: 6 })));
+        assert_eq!(pos("e2"), Ok(("", e2)));
+        assert_eq!(pos("a1"), Ok(("", a1)));
+        assert_eq!(pos("h7"), Ok(("", h7)));
     }
 
     #[test]
@@ -103,7 +104,7 @@ mod test {
                 "",
                 MoveDescription {
                     src_piece: Piece::King,
-                    dst_pos: Pos { file: 4, rank: 1 }
+                    dst_pos: e2
                 }
             ))
         );
@@ -113,7 +114,7 @@ mod test {
                 "",
                 MoveDescription {
                     src_piece: Piece::Pawn,
-                    dst_pos: Pos { file: 0, rank: 0 }
+                    dst_pos: a1
                 }
             ))
         );
