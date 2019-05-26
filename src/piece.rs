@@ -2,4 +2,5 @@
 pub enum Piece {
     Pawn,
     King,
+    Rook,
 }

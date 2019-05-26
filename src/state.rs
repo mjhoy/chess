@@ -48,6 +48,62 @@ impl State {
                 && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
         }
 
+        fn can_move_rook(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            can_move_laterally(_player, board, from_pos, to_pos)
+        }
+
+        fn can_move_laterally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            if from_pos == to_pos {
+                return false;
+            }
+
+            if to_pos.file == from_pos.file {
+                let range = if to_pos.rank > from_pos.rank {
+                    (from_pos.rank + 1)..to_pos.rank
+                } else {
+                    (to_pos.rank + 1)..from_pos.rank
+                };
+
+                for next_rank in range {
+                    let next_pos = Pos {
+                        rank: next_rank,
+                        file: to_pos.file,
+                    };
+                    if board.piece_at(next_pos).is_some() {
+                        return false;
+                    }
+                }
+
+                true
+            } else if to_pos.rank == from_pos.rank {
+                let range = if to_pos.file > from_pos.file {
+                    (from_pos.file + 1)..to_pos.file
+                } else {
+                    (to_pos.file + 1)..from_pos.file
+                };
+
+                for next_file in range {
+                    let next_pos = Pos {
+                        rank: to_pos.rank,
+                        file: next_file,
+                    };
+                    if board.piece_at(next_pos).is_some() {
+                        return false;
+                    }
+                }
+
+                true
+            } else {
+                false
+            }
+        }
+
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
@@ -57,6 +113,7 @@ impl State {
                 _ => match piece {
                     Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
                     King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
+                    Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
                 },
             },
             _ => false,
@@ -108,20 +165,98 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::piece::Piece;
+    use crate::pos::*;
 
     fn test_board() -> Board {
         Board::initial()
     }
 
+    fn test_simple_board_for_piece_lateral_king(piece: Piece) -> Board {
+        // White king at d4, black king at b7, and white's variable
+        // piece at c4. E.g., the queen on this board:
+        // https://lichess.org/analysis/standard/8/1k6/8/8/2QK4/8/8/8_w_-_-
+        let inner = vec![
+            // rank 1
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 2
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 3
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 4
+            None,
+            None,
+            Some((White, piece)),
+            Some((White, King)),
+            None,
+            None,
+            None,
+            None,
+            // rank 5
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 6
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 7
+            None,
+            Some((Black, King)),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            // rank 8
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        ];
+
+        Board::from_squares(&inner)
+    }
+
     #[test]
     fn test_can_move_pseudo() {
         let board = test_board();
-        let e2 = Pos { rank: 1, file: 4 };
-        let e3 = Pos { rank: 2, file: 4 };
-        let a1 = Pos { rank: 0, file: 0 };
-        let a3 = Pos { rank: 2, file: 0 };
-        let b7 = Pos { rank: 6, file: 1 };
-        let b6 = Pos { rank: 5, file: 1 };
 
         let white_move = State {
             board: board.clone(),
@@ -136,6 +271,21 @@ mod test {
         assert!(!white_move.can_move_pseudo(a1, a3));
         assert!(!white_move.can_move_pseudo(b7, b6));
         assert!(black_move.can_move_pseudo(b7, b6));
+    }
+
+    #[test]
+    fn test_rook_moves() {
+        let board = test_simple_board_for_piece_lateral_king(Piece::Rook);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, c1));
+        assert!(white_move.can_move(c4, c7));
+        assert!(white_move.can_move(c4, a4));
+        assert!(!white_move.can_move(c4, h4)); // can't move through the king
     }
 
     #[test]
