@@ -1,6 +1,6 @@
 use crate::{
-    board::Board, game::Game, m0ve::Move, piece::Piece::*, player::Player, player::Player::*,
-    pos::Pos,
+    board::Board, from_to_step::FromToStep, game::Game, m0ve::Move, piece::Piece::*,
+    player::Player, player::Player::*, pos::Pos,
 };
 
 #[derive(Debug, Clone)]
@@ -104,6 +104,39 @@ impl State {
             }
         }
 
+        fn can_move_diagonally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            let rank_diff = from_pos.rank as i8 - to_pos.rank as i8;
+            let file_diff = from_pos.file as i8 - to_pos.file as i8;
+
+            if rank_diff.abs() == file_diff.abs() && rank_diff.abs() > 0 {
+                let ranks = FromToStep::from_to(from_pos.rank, to_pos.rank);
+                let files = FromToStep::from_to(from_pos.file, to_pos.file);
+                let coords = ranks.zip(files);
+                for (rank, file) in coords {
+                    let pos = Pos {
+                        rank: rank,
+                        file: file,
+                    };
+                    if board.piece_at(pos).is_some() {
+                        return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        fn can_move_bishop(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            return can_move_diagonally(_player, board, from_pos, to_pos);
+        }
+
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
@@ -112,6 +145,9 @@ impl State {
                 Some((to_player, _)) if to_player == self.player => false,
                 _ => match piece {
                     Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
+                    Bishop => {
+                        can_move_bishop(self.player, &self.board, from_pos, to_pos, to.is_some())
+                    }
                     King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
                     Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
                 },

@@ -18,10 +18,10 @@ impl Board {
             // rank 1
             Some((White, Rook)),
             None,
-            None,
+            Some((White, Bishop)),
             None,
             Some((White, King)),
-            None,
+            Some((White, Bishop)),
             None,
             Some((White, Rook)),
             // rank 2
@@ -81,10 +81,10 @@ impl Board {
             // rank 8
             Some((Black, Rook)),
             None,
-            None,
+            Some((Black, Bishop)),
             None,
             Some((Black, King)),
-            None,
+            Some((Black, Bishop)),
             None,
             Some((Black, Rook)),
         ];
@@ -141,9 +141,11 @@ impl Board {
             let piece_str = match square {
                 None => " ",
                 Some((White, Pawn)) => "♙",
+                Some((White, Bishop)) => "♗",
                 Some((White, King)) => "♔",
                 Some((White, Rook)) => "♖",
                 Some((Black, Pawn)) => "♟",
+                Some((Black, Bishop)) => "♝",
                 Some((Black, King)) => "♚",
                 Some((Black, Rook)) => "♜",
             };
