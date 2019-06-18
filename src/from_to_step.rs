@@ -22,7 +22,7 @@ impl Iterator for FromToStep {
         if self.from >= self.to && self.step > 0 {
             return None;
         }
-        return Some(self.from);
+        Some(self.from)
     }
 }
 

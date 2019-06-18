@@ -113,17 +113,14 @@ impl State {
                 let files = FromToStep::from_to(from_pos.file, to_pos.file);
                 let coords = ranks.zip(files);
                 for (rank, file) in coords {
-                    let pos = Pos {
-                        rank: rank,
-                        file: file,
-                    };
+                    let pos = Pos { rank, file };
                     if board.piece_at(pos).is_some() {
                         return false;
                     }
                 }
-                return true;
+                true
             } else {
-                return false;
+                false
             }
         }
 
@@ -134,7 +131,7 @@ impl State {
             to_pos: Pos,
             _capture: bool,
         ) -> bool {
-            return can_move_diagonally(_player, board, from_pos, to_pos);
+            can_move_diagonally(_player, board, from_pos, to_pos)
         }
 
         let from = self.board.piece_at(from_pos);
