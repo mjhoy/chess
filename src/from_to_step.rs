@@ -71,6 +71,12 @@ mod test {
     }
 
     #[test]
+    #[should_panic]
+    fn test_from_to_cant_be_equal() {
+        FromToStep::from_to(1, 1);
+    }
+
+    #[test]
     fn test_size_hint() {
         let ranges = vec![(4, 1), (1, 4), (1, 9)];
 
