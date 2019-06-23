@@ -8,21 +8,20 @@ impl Iterator for FromToStep {
     type Item = u8;
 
     fn next(&mut self) -> Option<u8> {
-        let new_next: i8 = self.from + self.step;
+        let (from, to, step) = (self.from, self.to, self.step);
+        let new_from: i8 = from + step;
 
-        if self.step < 0 {
-            assert!(self.from > 0, "from cannot go negative");
-        }
+        debug_assert!(!(step < 0 && from < 1), "from cannot go negative");
 
-        self.from = new_next;
+        self.from = new_from;
 
-        if self.from <= self.to && self.step < 0 {
+        if new_from <= to && step < 0 {
             return None;
         }
-        if self.from >= self.to && self.step > 0 {
+        if new_from >= to && step > 0 {
             return None;
         }
-        Some(self.from as u8)
+        Some(new_from as u8)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
