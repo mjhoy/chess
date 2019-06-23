@@ -24,6 +24,11 @@ impl Iterator for FromToStep {
         }
         Some(self.from as u8)
     }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let steps_remaining = ((self.to - self.from) / self.step).abs() as usize - 1;
+        (steps_remaining, Some(steps_remaining))
+    }
 }
 
 impl FromToStep {
@@ -64,5 +69,20 @@ mod test {
         assert_eq!(iterator.next(), Some(3));
         assert_eq!(iterator.next(), Some(2));
         assert_eq!(iterator.next(), None);
+    }
+
+    #[test]
+    fn test_size_hint() {
+        let ranges = vec![(4, 1), (1, 4), (1, 9)];
+
+        for range in ranges {
+            let iterator = FromToStep::from_to(range.0, range.1);
+            let mut steps = 0;
+            let initial_size_hint = iterator.size_hint();
+            for _i in iterator {
+                steps += 1;
+            }
+            assert_eq!(initial_size_hint, (steps, Some(steps)));
+        }
     }
 }
