@@ -6,6 +6,7 @@ use nom::{alt, do_parse, named, tag, value};
 named!(
     piece<&str, Piece>,
     alt!(
+        value!(Piece::Bishop, tag!("B")) |
         value!(Piece::King, tag!("K")) |
         value!(Piece::Rook, tag!("R")) |
         value!(Piece::Pawn, tag!(""))
