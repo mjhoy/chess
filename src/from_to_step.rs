@@ -1,6 +1,6 @@
 pub struct FromToStep {
-    from: u8,
-    to: u8,
+    from: i8,
+    to: i8,
     step: i8,
 }
 
@@ -8,13 +8,13 @@ impl Iterator for FromToStep {
     type Item = u8;
 
     fn next(&mut self) -> Option<u8> {
-        let new_next: i8 = (self.from as i8) + self.step;
+        let new_next: i8 = self.from + self.step;
 
         if self.step < 0 {
             assert!(self.from > 0, "from cannot go negative");
         }
 
-        self.from = new_next as u8;
+        self.from = new_next;
 
         if self.from <= self.to && self.step < 0 {
             return None;
@@ -22,7 +22,7 @@ impl Iterator for FromToStep {
         if self.from >= self.to && self.step > 0 {
             return None;
         }
-        Some(self.from)
+        Some(self.from as u8)
     }
 }
 
@@ -31,9 +31,17 @@ impl FromToStep {
         assert!(from != to, "from and to must be different values");
 
         if from > to {
-            FromToStep { from, to, step: -1 }
+            FromToStep {
+                from: from as i8,
+                to: to as i8,
+                step: -1,
+            }
         } else {
-            FromToStep { from, to, step: 1 }
+            FromToStep {
+                from: from as i8,
+                to: to as i8,
+                step: 1,
+            }
         }
     }
 }
