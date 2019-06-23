@@ -32,7 +32,7 @@ impl Iterator for FromToStep {
 
 impl FromToStep {
     pub fn from_to(from: u8, to: u8) -> FromToStep {
-        assert!(from != to, "from and to must be different values");
+        assert_ne!(from, to, "from and to must be different values");
 
         if from > to {
             FromToStep {
