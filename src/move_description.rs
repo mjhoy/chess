@@ -61,7 +61,7 @@ mod test {
         );
         assert_eq!(
             MoveDescription::parse("Ze2"),
-            Err(r#"parsing error: Error(Code("Ze2", Alt))"#.to_string())
+            Err(r#"parsing error: Error(("Ze2", Alt))"#.to_string())
         );
         assert_eq!(
             MoveDescription::parse("Ke2junk"),

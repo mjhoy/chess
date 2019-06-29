@@ -66,9 +66,7 @@ named!(
 mod test {
     use super::*;
     use crate::pos::*;
-    use nom::Context::Code;
-    use nom::Err::Error;
-    use nom::ErrorKind;
+    use nom::{error::ErrorKind, error_position, Err};
 
     #[test]
     fn parse_piece() {
@@ -80,14 +78,23 @@ mod test {
     fn parse_rank() {
         assert_eq!(rank("4e2"), Ok(("e2", 3)));
         assert_eq!(rank("41e2"), Ok(("1e2", 3)));
-        assert_eq!(rank("0e2"), Err(Error(Code("0e2", ErrorKind::Alt))));
-        assert_eq!(rank("9e2"), Err(Error(Code("9e2", ErrorKind::Alt))));
+        assert_eq!(
+            rank("0e2"),
+            Err(Err::Error(error_position!("0e2", ErrorKind::Alt)))
+        );
+        assert_eq!(
+            rank("9e2"),
+            Err(Err::Error(error_position!("9e2", ErrorKind::Alt)))
+        );
     }
 
     #[test]
     fn parse_file() {
         assert_eq!(file("e2"), Ok(("2", 4)));
-        assert_eq!(file("i2"), Err(Error(Code("i2", ErrorKind::Alt))));
+        assert_eq!(
+            file("i2"),
+            Err(Err::Error(error_position!("i2", ErrorKind::Alt)))
+        );
     }
 
     #[test]
