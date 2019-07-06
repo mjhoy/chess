@@ -19,7 +19,7 @@ impl Board {
             Some((White, Rook)),
             None,
             Some((White, Bishop)),
-            None,
+            Some((White, Queen)),
             Some((White, King)),
             Some((White, Bishop)),
             None,
@@ -82,7 +82,7 @@ impl Board {
             Some((Black, Rook)),
             None,
             Some((Black, Bishop)),
-            None,
+            Some((Black, Queen)),
             Some((Black, King)),
             Some((Black, Bishop)),
             None,
@@ -144,10 +144,12 @@ impl Board {
                 Some((White, Bishop)) => "♗",
                 Some((White, King)) => "♔",
                 Some((White, Rook)) => "♖",
+                Some((White, Queen)) => "♕",
                 Some((Black, Pawn)) => "♟",
                 Some((Black, Bishop)) => "♝",
                 Some((Black, King)) => "♚",
                 Some((Black, Rook)) => "♜",
+                Some((Black, Queen)) => "♛",
             };
             piece_str.to_string()
         }

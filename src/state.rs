@@ -43,22 +43,25 @@ impl State {
             }
         }
 
-        fn can_move_king(_player: Player, from_pos: Pos, to_pos: Pos, _capture: bool) -> bool {
+        fn can_move_king(from_pos: Pos, to_pos: Pos) -> bool {
             (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs() <= 1
                 && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
         }
 
-        fn can_move_rook(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_laterally(_player, board, from_pos, to_pos)
+        fn can_move_rook(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_laterally(board, from_pos, to_pos)
         }
 
-        fn can_move_laterally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+        fn can_move_bishop(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_diagonally(board, from_pos, to_pos)
+        }
+
+        fn can_move_queen(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_diagonally(board, from_pos, to_pos)
+                || can_move_laterally(board, from_pos, to_pos)
+        }
+
+        fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             if from_pos == to_pos {
                 return false;
             }
@@ -104,7 +107,7 @@ impl State {
             }
         }
 
-        fn can_move_diagonally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+        fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             let rank_diff = from_pos.rank as i8 - to_pos.rank as i8;
             let file_diff = from_pos.file as i8 - to_pos.file as i8;
 
@@ -124,16 +127,6 @@ impl State {
             }
         }
 
-        fn can_move_bishop(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_diagonally(_player, board, from_pos, to_pos)
-        }
-
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
@@ -142,11 +135,10 @@ impl State {
                 Some((to_player, _)) if to_player == self.player => false,
                 _ => match piece {
                     Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
-                    Bishop => {
-                        can_move_bishop(self.player, &self.board, from_pos, to_pos, to.is_some())
-                    }
-                    King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
-                    Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
+                    Bishop => can_move_bishop(&self.board, from_pos, to_pos),
+                    King => can_move_king(from_pos, to_pos),
+                    Rook => can_move_rook(&self.board, from_pos, to_pos),
+                    Queen => can_move_queen(&self.board, from_pos, to_pos),
                 },
             },
             _ => false,
@@ -273,6 +265,38 @@ mod test {
         assert!(white_move.can_move(c4, a2));
         assert!(white_move.can_move(c4, a6));
         assert!(!white_move.can_move(c4, f1)); // can't move through white king
+    }
+
+    #[test]
+    fn test_queen_diagonal_moves() {
+        let board = test_simple_board_for_piece_diagonal_king(Piece::Queen);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, d5));
+        assert!(white_move.can_move(c4, e6));
+        assert!(white_move.can_move(c4, g8));
+        assert!(white_move.can_move(c4, a2));
+        assert!(white_move.can_move(c4, a6));
+        assert!(!white_move.can_move(c4, f1)); // can't move through white king
+    }
+
+    #[test]
+    fn test_queen_lateral_moves() {
+        let board = test_simple_board_for_piece_lateral_king(Piece::Queen);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, c1));
+        assert!(white_move.can_move(c4, c7));
+        assert!(white_move.can_move(c4, a4));
+        assert!(!white_move.can_move(c4, h4)); // can't move through the king
     }
 
     #[test]
