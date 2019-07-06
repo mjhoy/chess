@@ -1,4 +1,5 @@
 pub mod board;
+pub mod fen;
 pub mod from_to_step;
 pub mod game;
 pub mod m0ve;
