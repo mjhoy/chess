@@ -58,6 +58,27 @@ impl State {
             can_move_laterally(_player, board, from_pos, to_pos)
         }
 
+        fn can_move_bishop(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            can_move_diagonally(_player, board, from_pos, to_pos)
+        }
+
+        fn can_move_queen(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            can_move_diagonally(_player, board, from_pos, to_pos)
+                || can_move_laterally(_player, board, from_pos, to_pos)
+        }
+
         fn can_move_laterally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             if from_pos == to_pos {
                 return false;
@@ -122,27 +143,6 @@ impl State {
             } else {
                 false
             }
-        }
-
-        fn can_move_bishop(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_diagonally(_player, board, from_pos, to_pos)
-        }
-
-        fn can_move_queen(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_diagonally(_player, board, from_pos, to_pos)
-                || can_move_laterally(_player, board, from_pos, to_pos)
         }
 
         let from = self.board.piece_at(from_pos);
