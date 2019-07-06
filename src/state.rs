@@ -43,43 +43,25 @@ impl State {
             }
         }
 
-        fn can_move_king(_player: Player, from_pos: Pos, to_pos: Pos, _capture: bool) -> bool {
+        fn can_move_king(from_pos: Pos, to_pos: Pos) -> bool {
             (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs() <= 1
                 && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
         }
 
-        fn can_move_rook(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_laterally(_player, board, from_pos, to_pos)
+        fn can_move_rook(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_laterally(board, from_pos, to_pos)
         }
 
-        fn can_move_bishop(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_diagonally(_player, board, from_pos, to_pos)
+        fn can_move_bishop(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_diagonally(board, from_pos, to_pos)
         }
 
-        fn can_move_queen(
-            _player: Player,
-            board: &Board,
-            from_pos: Pos,
-            to_pos: Pos,
-            _capture: bool,
-        ) -> bool {
-            can_move_diagonally(_player, board, from_pos, to_pos)
-                || can_move_laterally(_player, board, from_pos, to_pos)
+        fn can_move_queen(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+            can_move_diagonally(board, from_pos, to_pos)
+                || can_move_laterally(board, from_pos, to_pos)
         }
 
-        fn can_move_laterally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+        fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             if from_pos == to_pos {
                 return false;
             }
@@ -125,7 +107,7 @@ impl State {
             }
         }
 
-        fn can_move_diagonally(_player: Player, board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+        fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             let rank_diff = from_pos.rank as i8 - to_pos.rank as i8;
             let file_diff = from_pos.file as i8 - to_pos.file as i8;
 
@@ -153,14 +135,10 @@ impl State {
                 Some((to_player, _)) if to_player == self.player => false,
                 _ => match piece {
                     Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
-                    Bishop => {
-                        can_move_bishop(self.player, &self.board, from_pos, to_pos, to.is_some())
-                    }
-                    King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
-                    Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
-                    Queen => {
-                        can_move_queen(self.player, &self.board, from_pos, to_pos, to.is_some())
-                    }
+                    Bishop => can_move_bishop(&self.board, from_pos, to_pos),
+                    King => can_move_king(from_pos, to_pos),
+                    Rook => can_move_rook(&self.board, from_pos, to_pos),
+                    Queen => can_move_queen(&self.board, from_pos, to_pos),
                 },
             },
             _ => false,
