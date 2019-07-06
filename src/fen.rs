@@ -98,6 +98,22 @@ fn extra_state(input: &str) -> IResult<&str, Player> {
         value(Player::Black, tag("b")),
     ))(input)
 }
+
+pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
+    let (player, piece) = player_piece;
+    let piece_str = match piece {
+        Piece::Pawn => "p",
+        Piece::Bishop => "b",
+        Piece::King => "k",
+        Piece::Rook => "r",
+    };
+    if player == Player::White {
+        piece_str.to_uppercase().to_string()
+    } else {
+        piece_str.to_string()
+    }
+}
+
 /// Parses Forsyth-Edwards notation:
 /// https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation
 pub fn fen(input: &str) -> IResult<&str, State> {
