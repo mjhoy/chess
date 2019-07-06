@@ -106,6 +106,7 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
         Piece::Bishop => "b",
         Piece::King => "k",
         Piece::Rook => "r",
+        Piece::Queen => "q",
     };
     if player == Player::White {
         piece_str.to_uppercase().to_string()

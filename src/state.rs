@@ -134,6 +134,17 @@ impl State {
             can_move_diagonally(_player, board, from_pos, to_pos)
         }
 
+        fn can_move_queen(
+            _player: Player,
+            board: &Board,
+            from_pos: Pos,
+            to_pos: Pos,
+            _capture: bool,
+        ) -> bool {
+            can_move_diagonally(_player, board, from_pos, to_pos)
+                || can_move_laterally(_player, board, from_pos, to_pos)
+        }
+
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
@@ -147,6 +158,9 @@ impl State {
                     }
                     King => can_move_king(self.player, from_pos, to_pos, to.is_some()),
                     Rook => can_move_rook(self.player, &self.board, from_pos, to_pos, to.is_some()),
+                    Queen => {
+                        can_move_queen(self.player, &self.board, from_pos, to_pos, to.is_some())
+                    }
                 },
             },
             _ => false,
