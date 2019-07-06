@@ -268,6 +268,38 @@ mod test {
     }
 
     #[test]
+    fn test_queen_diagonal_moves() {
+        let board = test_simple_board_for_piece_diagonal_king(Piece::Queen);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, d5));
+        assert!(white_move.can_move(c4, e6));
+        assert!(white_move.can_move(c4, g8));
+        assert!(white_move.can_move(c4, a2));
+        assert!(white_move.can_move(c4, a6));
+        assert!(!white_move.can_move(c4, f1)); // can't move through white king
+    }
+
+    #[test]
+    fn test_queen_lateral_moves() {
+        let board = test_simple_board_for_piece_lateral_king(Piece::Queen);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        assert!(white_move.can_move(c4, c1));
+        assert!(white_move.can_move(c4, c7));
+        assert!(white_move.can_move(c4, a4));
+        assert!(!white_move.can_move(c4, h4)); // can't move through the king
+    }
+
+    #[test]
     fn test_in_check() {
         let (_, not_in_check_state) = fen("8/8/8/8/8/pkp5/8/PKP5 w").unwrap();
         assert!(!not_in_check_state.in_check());

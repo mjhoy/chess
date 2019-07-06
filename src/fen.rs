@@ -43,6 +43,10 @@ fn piece(player: Player) -> impl Fn(&str) -> IResult<&str, SquareBuilder> {
                 SquareBuilder::Occupied((player, Piece::Rook)),
                 tag(if capitalized { "R" } else { "r" }),
             ),
+            value(
+                SquareBuilder::Occupied((player, Piece::Queen)),
+                tag(if capitalized { "Q" } else { "q" }),
+            ),
         ))(input)
     }
 }
