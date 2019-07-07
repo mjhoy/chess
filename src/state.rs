@@ -61,6 +61,12 @@ impl State {
                 || can_move_laterally(board, from_pos, to_pos)
         }
 
+        fn can_move_knight(from_pos: Pos, to_pos: Pos) -> bool {
+            let rank_diff = (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs();
+            let file_diff = (i32::from(from_pos.file) - i32::from(to_pos.file)).abs();
+            rank_diff >= 1 && file_diff >= 1 && rank_diff + file_diff == 3
+        }
+
         fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
             if from_pos == to_pos {
                 return false;
@@ -139,6 +145,7 @@ impl State {
                     King => can_move_king(from_pos, to_pos),
                     Rook => can_move_rook(&self.board, from_pos, to_pos),
                     Queen => can_move_queen(&self.board, from_pos, to_pos),
+                    Knight => can_move_knight(from_pos, to_pos),
                 },
             },
             _ => false,
@@ -193,6 +200,7 @@ mod test {
     use crate::fen::{fen, piece_to_fen};
     use crate::piece::Piece;
     use crate::pos::*;
+    use itertools::Itertools;
 
     fn test_board() -> Board {
         Board::initial()
@@ -297,6 +305,26 @@ mod test {
         assert!(white_move.can_move(c4, c7));
         assert!(white_move.can_move(c4, a4));
         assert!(!white_move.can_move(c4, h4)); // can't move through the king
+    }
+
+    #[test]
+    fn test_knight_moves() {
+        let board = test_simple_board_for_piece_lateral_king(Piece::Knight);
+
+        let white_move = State {
+            board,
+            player: White,
+        };
+
+        let valid_moves = vec![b6, a5, a3, b2, d2, e3, e5, d6];
+        for (rank, file) in (0..8).cartesian_product(0..8) {
+            let pos = Pos { file, rank };
+            if valid_moves.contains(&pos) {
+                assert!(white_move.can_move(c4, pos));
+            } else {
+                assert!(!white_move.can_move(c4, pos));
+            }
+        }
     }
 
     #[test]

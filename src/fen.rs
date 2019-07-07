@@ -47,6 +47,10 @@ fn piece(player: Player) -> impl Fn(&str) -> IResult<&str, SquareBuilder> {
                 SquareBuilder::Occupied((player, Piece::Queen)),
                 tag(if capitalized { "Q" } else { "q" }),
             ),
+            value(
+                SquareBuilder::Occupied((player, Piece::Knight)),
+                tag(if capitalized { "N" } else { "n" }),
+            ),
         ))(input)
     }
 }
@@ -111,6 +115,7 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
         Piece::King => "k",
         Piece::Rook => "r",
         Piece::Queen => "q",
+        Piece::Knight => "n",
     };
     if player == Player::White {
         piece_str.to_uppercase().to_string()

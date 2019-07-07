@@ -17,12 +17,12 @@ impl Board {
         let inner = vec![
             // rank 1
             Some((White, Rook)),
-            None,
+            Some((White, Knight)),
             Some((White, Bishop)),
             Some((White, Queen)),
             Some((White, King)),
             Some((White, Bishop)),
-            None,
+            Some((White, Knight)),
             Some((White, Rook)),
             // rank 2
             Some((White, Pawn)),
@@ -80,12 +80,12 @@ impl Board {
             Some((Black, Pawn)),
             // rank 8
             Some((Black, Rook)),
-            None,
+            Some((Black, Knight)),
             Some((Black, Bishop)),
             Some((Black, Queen)),
             Some((Black, King)),
             Some((Black, Bishop)),
-            None,
+            Some((Black, Knight)),
             Some((Black, Rook)),
         ];
         Board { inner }
@@ -145,11 +145,13 @@ impl Board {
                 Some((White, King)) => "♔",
                 Some((White, Rook)) => "♖",
                 Some((White, Queen)) => "♕",
+                Some((White, Knight)) => "♘",
                 Some((Black, Pawn)) => "♟",
                 Some((Black, Bishop)) => "♝",
                 Some((Black, King)) => "♚",
                 Some((Black, Rook)) => "♜",
                 Some((Black, Queen)) => "♛",
+                Some((Black, Knight)) => "♞",
             };
             piece_str.to_string()
         }

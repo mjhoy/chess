@@ -5,4 +5,5 @@ pub enum Piece {
     King,
     Rook,
     Queen,
+    Knight,
 }
