@@ -12,6 +12,7 @@ fn piece(input: &str) -> IResult<&str, Piece> {
         value(Piece::King, tag("K")),
         value(Piece::Rook, tag("R")),
         value(Piece::Queen, tag("Q")),
+        value(Piece::Knight, tag("N")),
         value(Piece::Pawn, tag("")),
     ))(input)
 }
