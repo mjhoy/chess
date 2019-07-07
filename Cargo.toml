@@ -16,3 +16,4 @@ path = "src/bin/main.rs"
 [dependencies]
 itertools = "0.7.8"
 nom = "5.0.0"
+clap = "2.33.0"

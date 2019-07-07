@@ -14,3 +14,9 @@ impl Default for Game {
         Game { state }
     }
 }
+
+impl Game {
+    pub fn with_state(state: State) -> Game {
+        Game { state }
+    }
+}
