@@ -6,7 +6,7 @@ use chess::move_description::MoveDescription;
 use chess::new_game;
 use clap::{App, Arg, SubCommand};
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
     let matches = App::new("chess")
@@ -35,7 +35,7 @@ fn main() {
         game = new_game();
     }
 
-    if let Some(_) = matches.subcommand_matches("play") {
+    if matches.subcommand_matches("play").is_some() {
         play(game);
     } else {
         println!("{}", game.state.board.str());
