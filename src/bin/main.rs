@@ -1,8 +1,8 @@
 use std::io;
 
+use chess::an::parse_an;
 use chess::fen::fen;
 use chess::game::Game;
-use chess::move_description::MoveDescription;
 use chess::new_game;
 use clap::{App, Arg, SubCommand};
 
@@ -69,7 +69,7 @@ fn play(mut game: Game) {
             break;
         }
 
-        match MoveDescription::parse(buf.trim()) {
+        match parse_an(buf.trim()) {
             Ok(move_description) => match move_description.match_moves(moves) {
                 Some(m0ve) => {
                     game = m0ve.next;
