@@ -152,13 +152,15 @@ impl State {
 
     /// Can the current player move the piece in `from_pos` to `to_pos`?
     pub fn can_move(&self, from_pos: Pos, to_pos: Pos) -> bool {
-        self.can_move_pseudo(from_pos, to_pos) && {
-            let next_state = &State {
-                player: self.player,
-                board: self.board.move_piece(from_pos, to_pos),
-            };
-            !next_state.in_check()
+        if !self.can_move_pseudo(from_pos, to_pos) {
+            return false;
         }
+
+        let next_state = &State {
+            player: self.player,
+            board: self.board.move_piece(from_pos, to_pos),
+        };
+        !next_state.in_check()
     }
 
     /// Generate the next legal moves for this game state.
