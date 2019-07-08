@@ -62,9 +62,8 @@ impl State {
         }
 
         fn can_move_knight(from_pos: Pos, to_pos: Pos) -> bool {
-            let rank_diff = (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs();
-            let file_diff = (i32::from(from_pos.file) - i32::from(to_pos.file)).abs();
-            rank_diff >= 1 && file_diff >= 1 && rank_diff + file_diff == 3
+            let diff = from_pos.abs_diff(to_pos);
+            diff.rank >= 1 && diff.file >= 1 && diff.rank + diff.file == 3
         }
 
         fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
@@ -114,10 +113,9 @@ impl State {
         }
 
         fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            let rank_diff = from_pos.rank as i8 - to_pos.rank as i8;
-            let file_diff = from_pos.file as i8 - to_pos.file as i8;
+            let diff = from_pos.abs_diff(to_pos);
 
-            if rank_diff.abs() == file_diff.abs() && rank_diff.abs() > 0 {
+            if diff.rank == diff.file && diff.rank > 0 {
                 let ranks = FromToStep::from_to(from_pos.rank, to_pos.rank);
                 let files = FromToStep::from_to(from_pos.file, to_pos.file);
                 let coords = ranks.zip(files);

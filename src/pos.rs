@@ -11,6 +11,15 @@ impl Pos {
         let rank_offset = (self.rank * nsize) as usize;
         rank_offset + (self.file as usize)
     }
+
+    /// Returns a position representing the absolute difference
+    /// between `self` and `other`.
+    pub fn abs_diff(self, other: Pos) -> Pos {
+        let rank = (other.rank as i8 - self.rank as i8).abs() as u8;
+        let file = (other.file as i8 - self.file as i8).abs() as u8;
+
+        Pos { rank, file }
+    }
 }
 
 pub const a1: Pos = Pos { rank: 0, file: 0 };
