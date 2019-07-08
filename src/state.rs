@@ -2,6 +2,7 @@ use crate::{
     board::Board, from_to_step::FromToStep, game::Game, m0ve::Move, piece::Piece::*,
     player::Player, player::Player::*, pos::Pos,
 };
+use itertools::Itertools;
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -166,29 +167,24 @@ impl State {
     /// Generate the next legal moves for this game state.
     /// On^2 for n squares
     pub fn gen_moves(&self) -> Vec<Move> {
-        self.board
-            .coords()
+        let coords = self.board.coords();
+        coords
             .iter()
-            .flat_map(|from_pos| {
-                self.board
-                    .coords()
-                    .iter()
-                    .filter_map(|to_pos| {
-                        if self.can_move(*from_pos, *to_pos) {
-                            Some(Move {
-                                index: (*from_pos, *to_pos),
-                                next: Game {
-                                    state: State {
-                                        board: self.board.move_piece(*from_pos, *to_pos),
-                                        player: self.player.other(),
-                                    },
-                                },
-                            })
-                        } else {
-                            None
-                        }
+            .cartesian_product(coords.iter())
+            .filter_map(|(from_pos, to_pos)| {
+                if self.can_move(*from_pos, *to_pos) {
+                    Some(Move {
+                        index: (*from_pos, *to_pos),
+                        next: Game {
+                            state: State {
+                                board: self.board.move_piece(*from_pos, *to_pos),
+                                player: self.player.other(),
+                            },
+                        },
                     })
-                    .collect::<Vec<Move>>()
+                } else {
+                    None
+                }
             })
             .collect()
     }
