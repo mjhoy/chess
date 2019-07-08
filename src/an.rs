@@ -49,11 +49,21 @@ fn pos(input: &str) -> IResult<&str, Pos> {
     Ok((input, Pos { file, rank }))
 }
 
-/// Parses a movement description.
-pub fn move_description(input: &str) -> IResult<&str, MoveDescription> {
+fn an(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
     Ok((input, MoveDescription { src_piece, dst_pos }))
+}
+
+/// Parses a movement description from algebraic notation.
+pub fn parse_an(input: &str) -> Result<MoveDescription, String> {
+    match an(input) {
+        Ok((ref rem, ref _md)) if !rem.is_empty() => {
+            Err("parsing error: extra characters".to_string())
+        }
+        Ok((_remaining, md)) => Ok(md),
+        Err(e) => Err(format!("parsing error: {:?}", e)),
+    }
 }
 
 #[cfg(test)]
@@ -63,13 +73,13 @@ mod test {
     use nom::{error::ErrorKind, error_position, Err};
 
     #[test]
-    fn parse_piece() {
+    fn test_piece() {
         assert_eq!(piece("Ke4"), Ok(("e4", Piece::King)));
         assert_eq!(piece("e4"), Ok(("e4", Piece::Pawn)));
     }
 
     #[test]
-    fn parse_rank() {
+    fn test_rank() {
         assert_eq!(rank("4e2"), Ok(("e2", 3)));
         assert_eq!(rank("41e2"), Ok(("1e2", 3)));
         assert_eq!(
@@ -83,7 +93,7 @@ mod test {
     }
 
     #[test]
-    fn parse_file() {
+    fn test_file() {
         assert_eq!(file("e2"), Ok(("2", 4)));
         assert_eq!(
             file("i2"),
@@ -92,16 +102,16 @@ mod test {
     }
 
     #[test]
-    fn parse_pos() {
+    fn test_pos() {
         assert_eq!(pos("e2"), Ok(("", e2)));
         assert_eq!(pos("a1"), Ok(("", a1)));
         assert_eq!(pos("h7"), Ok(("", h7)));
     }
 
     #[test]
-    fn parse_move_description() {
+    fn test_an() {
         assert_eq!(
-            move_description("Ke2"),
+            an("Ke2"),
             Ok((
                 "",
                 MoveDescription {
@@ -111,7 +121,7 @@ mod test {
             ))
         );
         assert_eq!(
-            move_description("a1"),
+            an("a1"),
             Ok((
                 "",
                 MoveDescription {
@@ -119,6 +129,25 @@ mod test {
                     dst_pos: a1
                 }
             ))
+        );
+    }
+
+    #[test]
+    fn test_parse_an() {
+        assert_eq!(
+            parse_an("Ke2"),
+            Ok(MoveDescription {
+                src_piece: Piece::King,
+                dst_pos: e2,
+            })
+        );
+        assert_eq!(
+            parse_an("Ze2"),
+            Err(r#"parsing error: Error(("Ze2", Tag))"#.to_string())
+        );
+        assert_eq!(
+            parse_an("Ke2junk"),
+            Err(r#"parsing error: extra characters"#.to_string())
         );
     }
 }

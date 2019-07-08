@@ -2,6 +2,7 @@ use crate::{
     board::Board, from_to_step::FromToStep, game::Game, m0ve::Move, piece::Piece::*,
     player::Player, player::Player::*, pos::Pos,
 };
+use itertools::Itertools;
 
 #[derive(Debug, Clone)]
 pub struct State {
@@ -26,8 +27,8 @@ impl State {
         false
     }
 
-    /// Can the current player move the piece, not taking into account
-    /// whether the king is in check?
+    // Can the current player move the piece, not taking into account
+    // whether the king is in check?
     fn can_move_pseudo(&self, from_pos: Pos, to_pos: Pos) -> bool {
         fn can_move_pawn(player: Player, from_pos: Pos, to_pos: Pos, capture: bool) -> bool {
             let next_rank = i32::from(from_pos.rank) + if player == White { 1 } else { -1 };
@@ -62,9 +63,8 @@ impl State {
         }
 
         fn can_move_knight(from_pos: Pos, to_pos: Pos) -> bool {
-            let rank_diff = (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs();
-            let file_diff = (i32::from(from_pos.file) - i32::from(to_pos.file)).abs();
-            rank_diff >= 1 && file_diff >= 1 && rank_diff + file_diff == 3
+            let diff = from_pos.abs_diff(to_pos);
+            diff.rank >= 1 && diff.file >= 1 && diff.rank + diff.file == 3
         }
 
         fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
@@ -114,10 +114,9 @@ impl State {
         }
 
         fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            let rank_diff = from_pos.rank as i8 - to_pos.rank as i8;
-            let file_diff = from_pos.file as i8 - to_pos.file as i8;
+            let diff = from_pos.abs_diff(to_pos);
 
-            if rank_diff.abs() == file_diff.abs() && rank_diff.abs() > 0 {
+            if diff.rank == diff.file && diff.rank > 0 {
                 let ranks = FromToStep::from_to(from_pos.rank, to_pos.rank);
                 let files = FromToStep::from_to(from_pos.file, to_pos.file);
                 let coords = ranks.zip(files);
@@ -154,41 +153,38 @@ impl State {
 
     /// Can the current player move the piece in `from_pos` to `to_pos`?
     pub fn can_move(&self, from_pos: Pos, to_pos: Pos) -> bool {
-        self.can_move_pseudo(from_pos, to_pos) && {
-            let next_state = &State {
-                player: self.player,
-                board: self.board.move_piece(from_pos, to_pos),
-            };
-            !next_state.in_check()
+        if !self.can_move_pseudo(from_pos, to_pos) {
+            return false;
         }
+
+        let next_state = &State {
+            player: self.player,
+            board: self.board.move_piece(from_pos, to_pos),
+        };
+        !next_state.in_check()
     }
 
     /// Generate the next legal moves for this game state.
     /// On^2 for n squares
     pub fn gen_moves(&self) -> Vec<Move> {
-        self.board
-            .coords()
+        let coords = self.board.coords();
+        coords
             .iter()
-            .flat_map(|from_pos| {
-                self.board
-                    .coords()
-                    .iter()
-                    .filter_map(|to_pos| {
-                        if self.can_move(*from_pos, *to_pos) {
-                            Some(Move {
-                                index: (*from_pos, *to_pos),
-                                next: Game {
-                                    state: State {
-                                        board: self.board.move_piece(*from_pos, *to_pos),
-                                        player: self.player.other(),
-                                    },
-                                },
-                            })
-                        } else {
-                            None
-                        }
+            .cartesian_product(coords.iter())
+            .filter_map(|(from_pos, to_pos)| {
+                if self.can_move(*from_pos, *to_pos) {
+                    Some(Move {
+                        index: (*from_pos, *to_pos),
+                        next: Game {
+                            state: State {
+                                board: self.board.move_piece(*from_pos, *to_pos),
+                                player: self.player.other(),
+                            },
+                        },
                     })
-                    .collect::<Vec<Move>>()
+                } else {
+                    None
+                }
             })
             .collect()
     }
@@ -200,7 +196,6 @@ mod test {
     use crate::fen::{fen, piece_to_fen};
     use crate::piece::Piece;
     use crate::pos::*;
-    use itertools::Itertools;
 
     fn test_board() -> Board {
         Board::initial()
@@ -317,12 +312,11 @@ mod test {
         };
 
         let valid_moves = vec![b6, a5, a3, b2, d2, e3, e5, d6];
-        for (rank, file) in (0..8).cartesian_product(0..8) {
-            let pos = Pos { file, rank };
-            if valid_moves.contains(&pos) {
-                assert!(white_move.can_move(c4, pos));
+        for pos in white_move.board.coords().iter() {
+            if valid_moves.contains(pos) {
+                assert!(white_move.can_move(c4, *pos));
             } else {
-                assert!(!white_move.can_move(c4, pos));
+                assert!(!white_move.can_move(c4, *pos));
             }
         }
     }
