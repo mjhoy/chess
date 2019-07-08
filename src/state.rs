@@ -198,7 +198,6 @@ mod test {
     use crate::fen::{fen, piece_to_fen};
     use crate::piece::Piece;
     use crate::pos::*;
-    use itertools::Itertools;
 
     fn test_board() -> Board {
         Board::initial()
@@ -315,12 +314,11 @@ mod test {
         };
 
         let valid_moves = vec![b6, a5, a3, b2, d2, e3, e5, d6];
-        for (rank, file) in (0..8).cartesian_product(0..8) {
-            let pos = Pos { file, rank };
-            if valid_moves.contains(&pos) {
-                assert!(white_move.can_move(c4, pos));
+        for pos in white_move.board.coords().iter() {
+            if valid_moves.contains(pos) {
+                assert!(white_move.can_move(c4, *pos));
             } else {
-                assert!(!white_move.can_move(c4, pos));
+                assert!(!white_move.can_move(c4, *pos));
             }
         }
     }
