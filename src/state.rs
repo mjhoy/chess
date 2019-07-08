@@ -26,8 +26,8 @@ impl State {
         false
     }
 
-    /// Can the current player move the piece, not taking into account
-    /// whether the king is in check?
+    // Can the current player move the piece, not taking into account
+    // whether the king is in check?
     fn can_move_pseudo(&self, from_pos: Pos, to_pos: Pos) -> bool {
         fn can_move_pawn(player: Player, from_pos: Pos, to_pos: Pos, capture: bool) -> bool {
             let next_rank = i32::from(from_pos.rank) + if player == White { 1 } else { -1 };
