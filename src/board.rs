@@ -1,6 +1,8 @@
 use itertools::iproduct;
 
 use crate::{piece::Piece::*, player::Player, player::Player::*, pos::Pos, square::Square};
+use ansi_term::Colour;
+use ansi_term::Style;
 
 pub type BoardMatrix = Vec<Square>;
 
@@ -165,7 +167,26 @@ impl Board {
                     rank: rowi,
                     file: coli,
                 };
-                buf.push_str(&format!("{} ", piece_str(self.inner[pos.to_offset(NSIZE)])));
+                let square = self.inner[pos.to_offset(NSIZE)];
+                let color = if (rowi + coli) % 2 == 0 {
+                    Colour::RGB(200, 200, 200)
+                } else {
+                    Colour::RGB(255, 255, 255)
+                };
+                let mut piece_color = color;
+                if let Some((Black, _)) = square {
+                    piece_color = Colour::RGB(0, 0, 0);
+                } else if let Some((White, _)) = square {
+                    piece_color = Colour::RGB(0, 0, 0);
+                }
+
+                buf.push_str(&format!(
+                    "{}",
+                    Style::new()
+                        .on(color)
+                        .fg(piece_color)
+                        .paint(format!("{} ", piece_str(square)))
+                ));
             }
             buf.push_str("\n");
         }
