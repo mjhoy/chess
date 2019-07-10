@@ -49,7 +49,7 @@ fn pos(input: &str) -> IResult<&str, Pos> {
     Ok((input, Pos { file, rank }))
 }
 
-fn an(input: &str) -> IResult<&str, MoveDescription> {
+pub fn an(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
     Ok((input, MoveDescription { src_piece, dst_pos }))
