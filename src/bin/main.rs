@@ -73,7 +73,7 @@ fn play_moves(mut game: Game, moves: Option<&str>) -> Game {
                         }
                     }
                 }
-                Err(_) => {
+                _ => {
                     panic!("couldn't parse move string {}", moves_str);
                 }
             }
