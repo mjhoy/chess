@@ -4,6 +4,7 @@ use chess;
 use chess::an;
 use chess::fen;
 use chess::game::Game;
+use chess::state::State;
 use clap::{App, Arg, SubCommand};
 use nom::bytes::complete::tag;
 use nom::multi::separated_list;
@@ -33,7 +34,8 @@ fn main() {
         .get_matches();
 
     let mut game = setup_game(matches.value_of("initial"));
-    game = play_moves(game, matches.value_of("moves"));
+    let new_state = play_moves(game.state, matches.value_of("moves"));
+    game = Game { state: new_state };
 
     if matches.subcommand_matches("play").is_some() {
         play(game);
@@ -56,7 +58,7 @@ fn setup_game(initial_fen: Option<&str>) -> Game {
     }
 }
 
-fn play_moves(mut game: Game, moves: Option<&str>) -> Game {
+fn play_moves(mut state: State, moves: Option<&str>) -> State {
     match moves {
         None => (),
         Some(moves_str) => {
@@ -64,10 +66,10 @@ fn play_moves(mut game: Game, moves: Option<&str>) -> Game {
             match res {
                 Ok((_, move_descriptions)) => {
                     for move_description in move_descriptions {
-                        let game_moves = game.state.gen_moves();
+                        let game_moves = state.gen_moves();
                         match move_description.match_moves(game_moves) {
                             Some(m0ve) => {
-                                game = m0ve.next;
+                                state = m0ve.next;
                             }
                             None => panic!("Error making move {:?}", move_description),
                         }
@@ -79,7 +81,7 @@ fn play_moves(mut game: Game, moves: Option<&str>) -> Game {
             }
         }
     }
-    game
+    state
 }
 
 fn play(mut game: Game) {
@@ -112,7 +114,7 @@ fn play(mut game: Game) {
         match an::parse_an(buf.trim()) {
             Ok(move_description) => match move_description.match_moves(moves) {
                 Some(m0ve) => {
-                    game = m0ve.next;
+                    game = Game { state: m0ve.next };
                 }
                 None => println!("Can't make that move!"),
             },

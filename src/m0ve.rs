@@ -1,9 +1,9 @@
-use crate::{game::Game, pos::Pos};
+use crate::{pos::Pos, state::State};
 use std::fmt;
 
 pub struct Move {
     pub index: (Pos, Pos),
-    pub next: Game,
+    pub next: State,
 }
 
 impl fmt::Display for Move {

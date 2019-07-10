@@ -1,6 +1,6 @@
 use crate::{
-    board::Board, from_to_step::FromToStep, game::Game, m0ve::Move, piece::Piece::*,
-    player::Player, player::Player::*, pos::Pos,
+    board::Board, from_to_step::FromToStep, m0ve::Move, piece::Piece::*, player::Player,
+    player::Player::*, pos::Pos,
 };
 use itertools::Itertools;
 
@@ -175,11 +175,9 @@ impl State {
                 if self.can_move(*from_pos, *to_pos) {
                     Some(Move {
                         index: (*from_pos, *to_pos),
-                        next: Game {
-                            state: State {
-                                board: self.board.move_piece(*from_pos, *to_pos),
-                                player: self.player.other(),
-                            },
+                        next: State {
+                            board: self.board.move_piece(*from_pos, *to_pos),
+                            player: self.player.other(),
                         },
                     })
                 } else {
