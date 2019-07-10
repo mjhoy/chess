@@ -20,12 +20,7 @@ impl MoveDescription {
 
     fn match_move(&self, m0ve: &Move) -> bool {
         let (_from, to) = m0ve.index;
-        let dst_piece = m0ve
-            .next
-            .state
-            .board
-            .piece_at(to)
-            .map(|(_player, piece)| piece);
+        let dst_piece = m0ve.next.board.piece_at(to).map(|(_player, piece)| piece);
         self.dst_pos == to && Some(self.src_piece) == dst_piece
     }
 }
@@ -48,7 +43,9 @@ mod test {
         for desc in &["e3", "e6", "Ke2", "e5", "Kd3", "e4"] {
             let next_moves = game.state.gen_moves();
             let move_desc = parse_an(desc).unwrap();
-            game = move_desc.match_moves(next_moves).unwrap().next;
+            game = Game {
+                state: move_desc.match_moves(next_moves).unwrap().next,
+            };
         }
 
         assert_eq!(
