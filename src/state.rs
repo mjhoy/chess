@@ -30,124 +30,21 @@ impl State {
     // Can the current player move the piece, not taking into account
     // whether the king is in check?
     fn can_move_pseudo(&self, from_pos: Pos, to_pos: Pos) -> bool {
-        fn can_move_pawn(player: Player, from_pos: Pos, to_pos: Pos, capture: bool) -> bool {
-            let next_rank = i32::from(from_pos.rank) + if player == White { 1 } else { -1 };
-            if to_pos.rank != next_rank as u8 {
-                return false;
-            }
-
-            if capture {
-                (to_pos.file > 0 /* u8 guard */ && from_pos.file == to_pos.file - 1)
-                    || from_pos.file == to_pos.file + 1
-            } else {
-                from_pos.file == to_pos.file
-            }
-        }
-
-        fn can_move_king(from_pos: Pos, to_pos: Pos) -> bool {
-            (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs() <= 1
-                && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
-        }
-
-        fn can_move_rook(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            can_move_laterally(board, from_pos, to_pos)
-        }
-
-        fn can_move_bishop(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            can_move_diagonally(board, from_pos, to_pos)
-        }
-
-        fn can_move_queen(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            can_move_diagonally(board, from_pos, to_pos)
-                || can_move_laterally(board, from_pos, to_pos)
-        }
-
-        fn can_move_knight(from_pos: Pos, to_pos: Pos) -> bool {
-            let diff = from_pos.abs_diff(to_pos);
-            diff.rank >= 1 && diff.file >= 1 && diff.rank + diff.file == 3
-        }
-
-        fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            if from_pos == to_pos {
-                return false;
-            }
-
-            if to_pos.file == from_pos.file {
-                let range = if to_pos.rank > from_pos.rank {
-                    (from_pos.rank + 1)..to_pos.rank
-                } else {
-                    (to_pos.rank + 1)..from_pos.rank
-                };
-
-                for next_rank in range {
-                    let next_pos = Pos {
-                        rank: next_rank,
-                        file: to_pos.file,
-                    };
-                    if board.piece_at(next_pos).is_some() {
-                        return false;
-                    }
-                }
-
-                true
-            } else if to_pos.rank == from_pos.rank {
-                let range = if to_pos.file > from_pos.file {
-                    (from_pos.file + 1)..to_pos.file
-                } else {
-                    (to_pos.file + 1)..from_pos.file
-                };
-
-                for next_file in range {
-                    let next_pos = Pos {
-                        rank: to_pos.rank,
-                        file: next_file,
-                    };
-                    if board.piece_at(next_pos).is_some() {
-                        return false;
-                    }
-                }
-
-                true
-            } else {
-                false
-            }
-        }
-
-        fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
-            let diff = from_pos.abs_diff(to_pos);
-
-            if diff.rank == diff.file && diff.rank > 0 {
-                let ranks = FromToStep::from_to(from_pos.rank, to_pos.rank);
-                let files = FromToStep::from_to(from_pos.file, to_pos.file);
-                let coords = ranks.zip(files);
-                for (rank, file) in coords {
-                    let pos = Pos { rank, file };
-                    if board.piece_at(pos).is_some() {
-                        return false;
-                    }
-                }
-                true
-            } else {
-                false
-            }
-        }
-
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
-        match from {
-            Some((from_player, piece)) if from_player == self.player => match to {
-                Some((to_player, _)) if to_player == self.player => false,
-                _ => match piece {
-                    Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
-                    Bishop => can_move_bishop(&self.board, from_pos, to_pos),
-                    King => can_move_king(from_pos, to_pos),
-                    Rook => can_move_rook(&self.board, from_pos, to_pos),
-                    Queen => can_move_queen(&self.board, from_pos, to_pos),
-                    Knight => can_move_knight(from_pos, to_pos),
-                },
+        match (from, to) {
+            (None, _) => false,
+            (Some((fp, _)), _) if fp != self.player => false,
+            (_, Some((tp, _))) if tp == self.player => false,
+            (Some((_, piece)), _) => match piece {
+                Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
+                Bishop => can_move_bishop(&self.board, from_pos, to_pos),
+                King => can_move_king(from_pos, to_pos),
+                Rook => can_move_rook(&self.board, from_pos, to_pos),
+                Queen => can_move_queen(&self.board, from_pos, to_pos),
+                Knight => can_move_knight(from_pos, to_pos),
             },
-            _ => false,
         }
     }
 
@@ -157,11 +54,22 @@ impl State {
             return false;
         }
 
-        let next_state = &State {
+        let next_state = State {
             player: self.player,
             board: self.board.move_piece(from_pos, to_pos),
         };
         !next_state.in_check()
+    }
+
+    fn build_move(&self, from: Pos, to: Pos) -> Move {
+        let next_state = State {
+            board: self.board.move_piece(from, to),
+            player: self.player.other(),
+        };
+        Move {
+            index: (from, to),
+            next: next_state,
+        }
     }
 
     /// Generate the next legal moves for this game state.
@@ -171,20 +79,115 @@ impl State {
         coords
             .iter()
             .cartesian_product(coords.iter())
-            .filter_map(|(from_pos, to_pos)| {
-                if self.can_move(*from_pos, *to_pos) {
-                    Some(Move {
-                        index: (*from_pos, *to_pos),
-                        next: State {
-                            board: self.board.move_piece(*from_pos, *to_pos),
-                            player: self.player.other(),
-                        },
-                    })
+            .filter_map(|(&from, &to)| {
+                if self.can_move(from, to) {
+                    Some(self.build_move(from, to))
                 } else {
                     None
                 }
             })
             .collect()
+    }
+}
+
+fn can_move_pawn(player: Player, from_pos: Pos, to_pos: Pos, capture: bool) -> bool {
+    let next_rank = i32::from(from_pos.rank) + if player == White { 1 } else { -1 };
+    if to_pos.rank != next_rank as u8 {
+        return false;
+    }
+
+    if capture {
+        (to_pos.file > 0 /* u8 guard */ && from_pos.file == to_pos.file - 1)
+            || from_pos.file == to_pos.file + 1
+    } else {
+        from_pos.file == to_pos.file
+    }
+}
+
+fn can_move_king(from_pos: Pos, to_pos: Pos) -> bool {
+    (i32::from(from_pos.rank) - i32::from(to_pos.rank)).abs() <= 1
+        && (i32::from(from_pos.file) - i32::from(to_pos.file)).abs() <= 1
+}
+
+fn can_move_rook(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+    can_move_laterally(board, from_pos, to_pos)
+}
+
+fn can_move_bishop(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+    can_move_diagonally(board, from_pos, to_pos)
+}
+
+fn can_move_queen(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+    can_move_diagonally(board, from_pos, to_pos) || can_move_laterally(board, from_pos, to_pos)
+}
+
+fn can_move_knight(from_pos: Pos, to_pos: Pos) -> bool {
+    let diff = from_pos.abs_diff(to_pos);
+    diff.rank >= 1 && diff.file >= 1 && diff.rank + diff.file == 3
+}
+
+fn can_move_laterally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+    if from_pos == to_pos {
+        return false;
+    }
+
+    if to_pos.file == from_pos.file {
+        let range = if to_pos.rank > from_pos.rank {
+            (from_pos.rank + 1)..to_pos.rank
+        } else {
+            (to_pos.rank + 1)..from_pos.rank
+        };
+
+        for next_rank in range {
+            let next_pos = Pos {
+                rank: next_rank,
+                file: to_pos.file,
+            };
+            if board.piece_at(next_pos).is_some() {
+                return false;
+            }
+        }
+
+        true
+    } else if to_pos.rank == from_pos.rank {
+        let range = if to_pos.file > from_pos.file {
+            (from_pos.file + 1)..to_pos.file
+        } else {
+            (to_pos.file + 1)..from_pos.file
+        };
+
+        for next_file in range {
+            let next_pos = Pos {
+                rank: to_pos.rank,
+                file: next_file,
+            };
+            if board.piece_at(next_pos).is_some() {
+                return false;
+            }
+        }
+
+        true
+    } else {
+        false
+    }
+}
+
+fn can_move_diagonally(board: &Board, from_pos: Pos, to_pos: Pos) -> bool {
+    let diff = from_pos.abs_diff(to_pos);
+
+    if diff.rank == diff.file && diff.rank > 0 {
+        let ranks = FromToStep::from_to(from_pos.rank, to_pos.rank);
+        let files = FromToStep::from_to(from_pos.file, to_pos.file);
+        let coords = ranks.zip(files);
+        for (rank, file) in coords {
+            let pos = Pos { rank, file };
+            if board.piece_at(pos).is_some() {
+                return false;
+            }
+        }
+        true
+    } else {
+        false
     }
 }
 
