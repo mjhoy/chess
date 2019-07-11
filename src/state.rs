@@ -61,6 +61,17 @@ impl State {
         !next_state.in_check()
     }
 
+    fn build_move(&self, from: Pos, to: Pos) -> Move {
+        let next_state = State {
+            board: self.board.move_piece(from, to),
+            player: self.player.other(),
+        };
+        Move {
+            index: (from, to),
+            next: next_state,
+        }
+    }
+
     /// Generate the next legal moves for this game state.
     /// On^2 for n squares
     pub fn gen_moves(&self) -> Vec<Move> {
@@ -68,15 +79,9 @@ impl State {
         coords
             .iter()
             .cartesian_product(coords.iter())
-            .filter_map(|(from_pos, to_pos)| {
-                if self.can_move(*from_pos, *to_pos) {
-                    Some(Move {
-                        index: (*from_pos, *to_pos),
-                        next: State {
-                            board: self.board.move_piece(*from_pos, *to_pos),
-                            player: self.player.other(),
-                        },
-                    })
+            .filter_map(|(&from, &to)| {
+                if self.can_move(from, to) {
+                    Some(self.build_move(from, to))
                 } else {
                     None
                 }
