@@ -1,8 +1,8 @@
-use itertools::iproduct;
-
 use crate::{piece::Piece::*, player::Player, player::Player::*, pos::Pos, square::Square};
 use ansi_term::Colour;
 use ansi_term::Style;
+
+use itertools::Itertools;
 
 pub type BoardMatrix = Vec<Square>;
 
@@ -100,11 +100,9 @@ impl Board {
     }
 
     pub fn coords(&self) -> Vec<Pos> {
-        iproduct!(0..NSIZE, 0..NSIZE)
-            .map(|(rank, file)| Pos {
-                rank: rank as u8,
-                file: file as u8,
-            })
+        (0..NSIZE)
+            .cartesian_product(0..NSIZE)
+            .map(|(rank, file)| Pos { rank, file })
             .collect()
     }
 
@@ -127,11 +125,11 @@ impl Board {
     }
 
     /// Move the piece at `from_pos` to `to_pos` and return the new board.
-    pub fn move_piece(&self, from_pos: Pos, to_pos: Pos) -> Board {
-        let new_inner: &mut BoardMatrix = &mut self.inner.clone();
-        let from = self.piece_at(from_pos);
-        new_inner[from_pos.to_offset(NSIZE)] = None;
-        new_inner[to_pos.to_offset(NSIZE)] = from;
+    pub fn move_piece(&self, from: Pos, to: Pos) -> Board {
+        let new_inner = &mut self.inner.clone();
+        let from_piece = self.piece_at(from);
+        new_inner[from.to_offset(NSIZE)] = None;
+        new_inner[to.to_offset(NSIZE)] = from_piece;
 
         Board {
             inner: new_inner.to_vec(),
