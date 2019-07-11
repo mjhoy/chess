@@ -201,7 +201,6 @@ impl Board {
 
 #[cfg(test)]
 mod test {
-
     use super::*;
     use crate::pos::*;
 
@@ -220,5 +219,16 @@ mod test {
 
         assert_eq!(board.get_king_pos(White), e1);
         assert_eq!(board.get_king_pos(Black), e8);
+    }
+
+    #[test]
+    fn test_move_piece() {
+        let board = Board::initial();
+        assert_eq!(board.piece_at(e2), Some((White, Pawn)));
+        assert_eq!(board.piece_at(e3), None);
+
+        let next_board = board.move_piece(e2, e3);
+        assert_eq!(next_board.piece_at(e2), None);
+        assert_eq!(next_board.piece_at(e3), Some((White, Pawn)));
     }
 }
