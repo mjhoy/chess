@@ -33,19 +33,18 @@ impl State {
         let from = self.board.piece_at(from_pos);
         let to = self.board.piece_at(to_pos);
 
-        match from {
-            Some((from_player, piece)) if from_player == self.player => match to {
-                Some((to_player, _)) if to_player == self.player => false,
-                _ => match piece {
-                    Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
-                    Bishop => can_move_bishop(&self.board, from_pos, to_pos),
-                    King => can_move_king(from_pos, to_pos),
-                    Rook => can_move_rook(&self.board, from_pos, to_pos),
-                    Queen => can_move_queen(&self.board, from_pos, to_pos),
-                    Knight => can_move_knight(from_pos, to_pos),
-                },
+        match (from, to) {
+            (None, _) => false,
+            (Some((fp, _)), _) if fp != self.player => false,
+            (_, Some((tp, _))) if tp == self.player => false,
+            (Some((_, piece)), _) => match piece {
+                Pawn => can_move_pawn(self.player, from_pos, to_pos, to.is_some()),
+                Bishop => can_move_bishop(&self.board, from_pos, to_pos),
+                King => can_move_king(from_pos, to_pos),
+                Rook => can_move_rook(&self.board, from_pos, to_pos),
+                Queen => can_move_queen(&self.board, from_pos, to_pos),
+                Knight => can_move_knight(from_pos, to_pos),
             },
-            _ => false,
         }
     }
 
