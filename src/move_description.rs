@@ -20,7 +20,7 @@ impl MoveDescription {
 
     fn match_move(&self, m0ve: &Move) -> bool {
         let (_from, to) = m0ve.index;
-        let dst_piece = m0ve.next.board.piece_at(to).map(|(_player, piece)| piece);
+        let dst_piece = m0ve.next.board.piece_at(to).map(|(_, piece)| piece);
         self.dst_pos == to && Some(self.src_piece) == dst_piece
     }
 }
