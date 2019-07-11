@@ -54,7 +54,7 @@ impl State {
             return false;
         }
 
-        let next_state = &State {
+        let next_state = State {
             player: self.player,
             board: self.board.move_piece(from_pos, to_pos),
         };
