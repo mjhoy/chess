@@ -131,9 +131,7 @@ impl Board {
         new_inner[from.to_offset(NSIZE)] = None;
         new_inner[to.to_offset(NSIZE)] = from_piece;
 
-        Board {
-            inner: new_inner,
-        }
+        Board { inner: new_inner }
     }
 
     pub fn str(&self) -> String {
