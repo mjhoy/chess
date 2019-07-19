@@ -126,14 +126,12 @@ impl Board {
 
     /// Move the piece at `from_pos` to `to_pos` and return the new board.
     pub fn move_piece(&self, from: Pos, to: Pos) -> Board {
-        let new_inner = &mut self.inner.clone();
+        let mut new_inner = self.inner.clone();
         let from_piece = self.piece_at(from);
         new_inner[from.to_offset(NSIZE)] = None;
         new_inner[to.to_offset(NSIZE)] = from_piece;
 
-        Board {
-            inner: new_inner.to_vec(),
-        }
+        Board { inner: new_inner }
     }
 
     pub fn str(&self) -> String {
