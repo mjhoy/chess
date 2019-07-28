@@ -28,13 +28,14 @@ impl State {
     }
 
     fn can_move_piece(&self, piece: Piece, from: Pos, to: Pos) -> bool {
-        let to_piece = self.board.piece_at(to);
+        let (board, player) = (&self.board, self.player);
+        let to_piece = board.piece_at(to);
         match piece {
-            Pawn => can_move_pawn(self.player, from, to, to_piece.is_some()),
-            Bishop => can_move_bishop(&self.board, from, to),
+            Pawn => can_move_pawn(board, player, from, to, to_piece.is_some()),
+            Bishop => can_move_bishop(board, from, to),
             King => can_move_king(from, to),
-            Rook => can_move_rook(&self.board, from, to),
-            Queen => can_move_queen(&self.board, from, to),
+            Rook => can_move_rook(board, from, to),
+            Queen => can_move_queen(board, from, to),
             Knight => can_move_knight(from, to),
         }
     }
@@ -95,7 +96,30 @@ impl State {
     }
 }
 
-fn can_move_pawn(player: Player, from: Pos, to: Pos, capture: bool) -> bool {
+fn can_move_pawn(board: &Board, player: Player, from: Pos, to: Pos, capture: bool) -> bool {
+    // check two-square advance
+    if !capture && from.file == to.file {
+        match (player, from.rank, to.rank) {
+            (White, 1, 3) => {
+                return board
+                    .piece_at(Pos {
+                        rank: 2,
+                        file: from.file,
+                    })
+                    .is_none();
+            }
+            (Black, 6, 4) => {
+                return board
+                    .piece_at(Pos {
+                        rank: 5,
+                        file: from.file,
+                    })
+                    .is_none();
+            }
+            _ => (),
+        }
+    }
+
     let next_rank = i32::from(from.rank) + if player == White { 1 } else { -1 };
     if to.rank != next_rank as u8 {
         return false;
@@ -336,5 +360,20 @@ mod test {
 
         let (_, in_check_state_2) = fen("8/8/8/8/8/pk6/P1p5/1KP5 b").unwrap();
         assert!(in_check_state_2.in_check());
+    }
+
+    #[test]
+    fn test_two_square_advance() {
+        let (_, initial_state) = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w").unwrap();
+        assert!(initial_state.can_move(e2, e4));
+
+        let (_, one_e4) = fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b").unwrap();
+        assert!(one_e4.can_move(e7, e5));
+
+        let (_, blocking) = fen("rnbqk1nr/pppp1ppp/4p3/8/4P3/b2P4/PPP2PPP/RNBQKBNR w").unwrap();
+        assert!(!blocking.can_move(a2, a4));
+
+        let (_, blocking2) = fen("rnbqk1nr/pppp1ppp/8/3Pp3/4P3/b7/PPP2PPP/RNBQKBNR b").unwrap();
+        assert!(!blocking2.can_move(d7, d5));
     }
 }
