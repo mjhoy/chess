@@ -10,7 +10,11 @@ impl Default for Game {
     fn default() -> Self {
         let board = Board::initial();
         let player = White;
-        let state = State { board, player };
+        let state = State {
+            board,
+            player,
+            en_passant: None,
+        };
         Game { state }
     }
 }
