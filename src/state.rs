@@ -33,7 +33,7 @@ impl State {
         let (board, player) = (&self.board, self.player);
         let to_piece = board.piece_at(to);
         match piece {
-            Pawn => can_move_pawn(board, player, from, to, to_piece.is_some()),
+            Pawn => can_move_pawn(board, player, from, to, to_piece.is_some(), self.en_passant),
             Bishop => can_move_bishop(board, from, to),
             King => can_move_king(from, to),
             Rook => can_move_rook(board, from, to),
@@ -88,8 +88,23 @@ impl State {
     }
 
     fn build_move(&self, from: Pos, to: Pos) -> Move {
+        let is_en_passant_capture = match self.board.piece_at(from) {
+            Some((_, Pawn)) => Some(to) == self.en_passant,
+            _ => false,
+        };
+        let next_board = if is_en_passant_capture {
+            let captured_pawn = Pos {
+                rank: from.rank,
+                file: to.file,
+            };
+            self.board
+                .move_piece(from, to)
+                .move_piece(from, captured_pawn)
+        } else {
+            self.board.move_piece(from, to)
+        };
         let next_state = State {
-            board: self.board.move_piece(from, to),
+            board: next_board,
             player: self.player.other(),
             en_passant: self.en_passant_pos(from, to),
         };
@@ -117,7 +132,14 @@ impl State {
     }
 }
 
-fn can_move_pawn(board: &Board, player: Player, from: Pos, to: Pos, capture: bool) -> bool {
+fn can_move_pawn(
+    board: &Board,
+    player: Player,
+    from: Pos,
+    to: Pos,
+    capture: bool,
+    en_passant: Option<Pos>,
+) -> bool {
     // check two-square advance
     if !capture && from.file == to.file {
         match (player, from.rank, to.rank) {
@@ -149,7 +171,7 @@ fn can_move_pawn(board: &Board, player: Player, from: Pos, to: Pos, capture: boo
     if capture {
         (to.file > 0 /* u8 guard */ && from.file == to.file - 1) || from.file == to.file + 1
     } else {
-        from.file == to.file
+        Some(to) == en_passant || from.file == to.file
     }
 }
 
@@ -404,5 +426,18 @@ mod test {
 
         let (_, blocking2) = fen("rnbqk1nr/pppp1ppp/8/3Pp3/4P3/b7/PPP2PPP/RNBQKBNR b - -").unwrap();
         assert!(!blocking2.can_move(d7, d5));
+    }
+
+    #[test]
+    fn test_en_passant_capture() {
+        let (_, initial_state) =
+            fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6").unwrap();
+        assert!(initial_state.can_move(e5, f6));
+        let next_state = initial_state.build_move(e5, f6).next;
+        assert_eq!(next_state.board.piece_at(f5), None);
+
+        let (_, initial_state) =
+            fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq -").unwrap();
+        assert!(!initial_state.can_move(e5, f6));
     }
 }
