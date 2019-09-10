@@ -271,8 +271,8 @@ mod test {
 
     fn simple_state(board: Board, player: Player) -> State {
         State {
-            board: board,
-            player: player,
+            board,
+            player,
             en_passant: None,
         }
     }

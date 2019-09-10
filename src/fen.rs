@@ -109,7 +109,7 @@ fn current_player(input: &str) -> IResult<&str, Player> {
 }
 
 fn en_passant_pos(input: &str) -> IResult<&str, Option<Pos>> {
-    alt((value(None, tag("-")), map(pos, |p: Pos| Some(p))))(input)
+    alt((value(None, tag("-")), map(pos, Some)))(input)
 }
 
 // TODO
