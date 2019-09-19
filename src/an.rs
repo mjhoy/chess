@@ -43,7 +43,7 @@ fn file(input: &str) -> IResult<&str, u8> {
     ))(input)
 }
 
-fn pos(input: &str) -> IResult<&str, Pos> {
+pub fn pos(input: &str) -> IResult<&str, Pos> {
     let (input, file) = file(input)?;
     let (input, rank) = rank(input)?;
     Ok((input, Pos { file, rank }))

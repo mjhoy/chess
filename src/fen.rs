@@ -1,14 +1,16 @@
+use crate::an::pos;
 use crate::board::Board;
 use crate::piece::Piece;
 use crate::player::Player;
+use crate::pos::Pos;
 use crate::state::State;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::character::complete::space1;
-use nom::combinator::value;
+use nom::character::complete::{alpha1, space1};
+use nom::combinator::{map, value};
 use nom::error::ErrorKind;
-use nom::multi::separated_list;
+use nom::multi::{many1, separated_list};
 use nom::Err;
 use nom::IResult;
 
@@ -99,12 +101,21 @@ fn row(input: &str) -> IResult<&str, Vec<SquareBuilder>> {
     Ok((input, row))
 }
 
-// For now, this is just whose turn it is.
-fn extra_state(input: &str) -> IResult<&str, Player> {
+fn current_player(input: &str) -> IResult<&str, Player> {
     alt((
         value(Player::White, tag("w")),
         value(Player::Black, tag("b")),
     ))(input)
+}
+
+fn en_passant_pos(input: &str) -> IResult<&str, Option<Pos>> {
+    alt((value(None, tag("-")), map(pos, Some)))(input)
+}
+
+// TODO
+fn castling(input: &str) -> IResult<&str, ()> {
+    let (input, _res) = many1(alt((tag("-"), alpha1)))(input)?;
+    Ok((input, ()))
 }
 
 pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
@@ -154,10 +165,21 @@ pub fn fen(input: &str) -> IResult<&str, State> {
     );
 
     let (input, _) = space1(input)?;
-    let (input, player) = extra_state(input)?;
+    let (input, player) = current_player(input)?;
+    let (input, _) = space1(input)?;
+    let (input, _castling) = castling(input)?;
+    let (input, _) = space1(input)?;
+    let (input, en_passant) = en_passant_pos(input)?;
 
     let board = Board::from_squares(squares.as_slice());
-    Ok((input, State { board, player }))
+    Ok((
+        input,
+        State {
+            board,
+            player,
+            en_passant,
+        },
+    ))
 }
 
 #[cfg(test)]
@@ -203,7 +225,7 @@ mod test {
 
     #[test]
     fn test_parse_valid_fen() {
-        let input = "r1b1kb1r/pppppppp/8/8/4P3/8/PPPP1PPP/R1B1KB1R b";
+        let input = "r1b1kb1r/pppppppp/8/8/4P3/8/PPPP1PPP/R1B1KB1R b - e3";
         let state_res = fen(input);
         assert!(state_res.is_ok(), "able to parse fen");
         let (_rest, state) = state_res.unwrap();
@@ -212,6 +234,7 @@ mod test {
         assert_eq!(state.board.piece_at(e1), Some((Player::White, Piece::King)));
         assert_eq!(state.board.piece_at(h2), Some((Player::White, Piece::Pawn)));
         assert_eq!(state.board.piece_at(h7), Some((Player::Black, Piece::Pawn)));
+        assert_eq!(state.en_passant, Some(e3));
     }
 
     #[test]
