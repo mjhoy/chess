@@ -4,11 +4,39 @@ use crate::{
 };
 use itertools::Itertools;
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct CastleAbility {
+    pub king: bool,
+    pub queen: bool,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Castling {
+    pub white: CastleAbility,
+    pub black: CastleAbility,
+}
+
+impl Castling {
+    pub fn initial() -> Self {
+        Castling {
+            white: CastleAbility {
+                king: true,
+                queen: true,
+            },
+            black: CastleAbility {
+                king: true,
+                queen: true,
+            },
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct State {
     pub board: Board,
     pub player: Player,
     pub en_passant: Option<Pos>,
+    pub castling: Castling,
 }
 
 impl State {
@@ -19,6 +47,7 @@ impl State {
             board: self.board.clone(),
             player: self.player.other(),
             en_passant: None,
+            castling: self.castling.clone(),
         };
 
         for from_pos in self.board.coords() {
@@ -66,6 +95,7 @@ impl State {
             player: self.player,
             board: self.board.move_piece(from_pos, to_pos),
             en_passant: None,
+            castling: Castling::initial(),
         };
         !next_state.in_check()
     }
@@ -107,6 +137,7 @@ impl State {
             board: next_board,
             player: self.player.other(),
             en_passant: self.en_passant_pos(from, to),
+            castling: Castling::initial(),
         };
         Move {
             index: (from, to),
@@ -274,6 +305,7 @@ mod test {
             board,
             player,
             en_passant: None,
+            castling: Castling::initial(),
         }
     }
 
