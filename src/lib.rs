@@ -1,5 +1,6 @@
 pub mod an;
 pub mod board;
+pub mod castling;
 pub mod fen;
 pub mod from_to_step;
 pub mod game;

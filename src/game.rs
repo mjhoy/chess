@@ -1,6 +1,7 @@
 use crate::board::Board;
+use crate::castling::Castling;
 use crate::player::Player::*;
-use crate::state::{Castling, State};
+use crate::state::State;
 
 pub struct Game {
     pub state: State,

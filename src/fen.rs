@@ -1,9 +1,10 @@
 use crate::an::pos;
 use crate::board::Board;
+use crate::castling::{CastleAbility, Castling};
 use crate::piece::Piece;
 use crate::player::Player;
 use crate::pos::Pos;
-use crate::state::{CastleAbility, Castling, State};
+use crate::state::State;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
