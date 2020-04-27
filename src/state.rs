@@ -90,7 +90,7 @@ impl State {
         }
     }
 
-    fn build_move(&self, from: Pos, to: Pos) -> Move {
+    fn build_simple_move(&self, from: Pos, to: Pos) -> Move {
         let is_en_passant_capture = match self.board.piece_at(from) {
             Some((_, Pawn)) => Some(to) == self.en_passant,
             _ => false,
@@ -127,7 +127,7 @@ impl State {
             .cartesian_product(coords.iter())
             .filter_map(|(&from, &to)| {
                 if self.can_move(from, to) {
-                    Some(self.build_move(from, to))
+                    Some(self.build_simple_move(from, to))
                 } else {
                     None
                 }
@@ -402,13 +402,13 @@ mod test {
         let (_, initial_state) = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
         assert!(initial_state.can_move(e2, e3));
 
-        let next_state = initial_state.build_move(e2, e3).next;
+        let next_state = initial_state.build_simple_move(e2, e3).next;
         assert_eq!(next_state.en_passant, None);
 
         let (_, one_e4) = fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
         assert!(one_e4.can_move(e7, e6));
 
-        let next_state = one_e4.build_move(e7, e6).next;
+        let next_state = one_e4.build_simple_move(e7, e6).next;
         assert_eq!(next_state.en_passant, None);
     }
 
@@ -417,13 +417,13 @@ mod test {
         let (_, initial_state) = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
         assert!(initial_state.can_move(e2, e4));
 
-        let next_state = initial_state.build_move(e2, e4).next;
+        let next_state = initial_state.build_simple_move(e2, e4).next;
         assert_eq!(next_state.en_passant, Some(e3));
 
         let (_, one_e4) = fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
         assert!(one_e4.can_move(e7, e5));
 
-        let next_state = one_e4.build_move(e7, e5).next;
+        let next_state = one_e4.build_simple_move(e7, e5).next;
         assert_eq!(next_state.en_passant, Some(e6));
 
         let (_, blocking) = fen("rnbqk1nr/pppp1ppp/4p3/8/4P3/b2P4/PPP2PPP/RNBQKBNR w - -").unwrap();
@@ -438,7 +438,7 @@ mod test {
         let (_, initial_state) =
             fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6").unwrap();
         assert!(initial_state.can_move(e5, f6));
-        let next_state = initial_state.build_move(e5, f6).next;
+        let next_state = initial_state.build_simple_move(e5, f6).next;
         assert_eq!(next_state.board.piece_at(f5), None);
 
         let (_, initial_state) =
