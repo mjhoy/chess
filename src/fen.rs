@@ -143,7 +143,7 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
         Piece::Knight => "n",
     };
     if player == Player::White {
-        piece_str.to_uppercase().to_string()
+        piece_str.to_uppercase()
     } else {
         piece_str.to_string()
     }

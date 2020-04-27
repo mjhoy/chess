@@ -1,6 +1,5 @@
 use std::io;
 
-use chess;
 use chess::an;
 use chess::fen;
 use chess::game::Game;
