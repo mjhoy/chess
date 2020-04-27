@@ -1,4 +1,4 @@
-use crate::m0ve::Move;
+use crate::m0ve::{Action, Move};
 use crate::piece::Piece;
 use crate::pos::Pos;
 
@@ -19,9 +19,14 @@ impl MoveDescription {
     }
 
     fn match_move(&self, m0ve: &Move) -> bool {
-        let (_from, to) = m0ve.index;
-        let dst_piece = m0ve.next.board.piece_at(to).map(|(_, piece)| piece);
-        self.dst_pos == to && Some(self.src_piece) == dst_piece
+        match m0ve.action {
+            Action::Simple { from: _, to } => {
+                let dst_piece = m0ve.next.board.piece_at(to).map(|(_, piece)| piece);
+                self.dst_pos == to && Some(self.src_piece) == dst_piece
+            }
+            // TODO
+            Action::Castle { kingside: _ } => false,
+        }
     }
 }
 

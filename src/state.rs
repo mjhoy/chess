@@ -1,6 +1,6 @@
 use crate::{
-    board::Board, castling::Castling, from_to_step::FromToStep, m0ve::Move, piece::Piece,
-    piece::Piece::*, player::Player, player::Player::*, pos::Pos,
+    board::Board, castling::Castling, from_to_step::FromToStep, m0ve::Action, m0ve::Move,
+    piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos,
 };
 use itertools::Itertools;
 
@@ -113,7 +113,7 @@ impl State {
             castling: Castling::initial(),
         };
         Move {
-            index: (from, to),
+            action: Action::Simple { from, to },
             next: next_state,
         }
     }
