@@ -110,6 +110,10 @@ impl Board {
         self.inner[pos.to_offset(NSIZE)]
     }
 
+    pub fn empty_at(&self, pos: Pos) -> bool {
+        self.piece_at(pos).is_none()
+    }
+
     /// Find the position of the king for `player`. Panics if no king is
     /// found.
     pub fn get_king_pos(&self, player: Player) -> Pos {
@@ -207,6 +211,14 @@ mod test {
         assert_eq!(board.piece_at(e2), Some((White, Pawn)));
         assert_eq!(board.piece_at(e1), Some((White, King)));
         assert_eq!(board.piece_at(b3), None);
+    }
+
+    #[test]
+    fn test_empty_at() {
+        let board = Board::initial();
+
+        assert_eq!(board.empty_at(e2), false);
+        assert_eq!(board.empty_at(b3), true);
     }
 
     #[test]
