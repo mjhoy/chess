@@ -1,10 +1,10 @@
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct CastleAbility {
     pub king: bool,
     pub queen: bool,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Castling {
     pub white: CastleAbility,
     pub black: CastleAbility,
