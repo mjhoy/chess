@@ -52,7 +52,7 @@ pub fn pos(input: &str) -> IResult<&str, Pos> {
 pub fn an(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
-    Ok((input, MoveDescription { src_piece, dst_pos }))
+    Ok((input, MoveDescription::Simple { src_piece, dst_pos }))
 }
 
 /// Parses a movement description from algebraic notation.
@@ -114,7 +114,7 @@ mod test {
             an("Ke2"),
             Ok((
                 "",
-                MoveDescription {
+                MoveDescription::Simple {
                     src_piece: Piece::King,
                     dst_pos: e2
                 }
@@ -124,7 +124,7 @@ mod test {
             an("a1"),
             Ok((
                 "",
-                MoveDescription {
+                MoveDescription::Simple {
                     src_piece: Piece::Pawn,
                     dst_pos: a1
                 }
@@ -136,7 +136,7 @@ mod test {
     fn test_parse_an() {
         assert_eq!(
             parse_an("Ke2"),
-            Ok(MoveDescription {
+            Ok(MoveDescription::Simple {
                 src_piece: Piece::King,
                 dst_pos: e2,
             })

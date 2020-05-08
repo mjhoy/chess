@@ -3,9 +3,8 @@ use crate::piece::Piece;
 use crate::pos::Pos;
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct MoveDescription {
-    pub src_piece: Piece,
-    pub dst_pos: Pos,
+pub enum MoveDescription {
+    Simple { src_piece: Piece, dst_pos: Pos },
 }
 
 impl MoveDescription {
@@ -19,13 +18,13 @@ impl MoveDescription {
     }
 
     fn match_move(&self, m0ve: &Move) -> bool {
-        match m0ve.action {
-            Action::Simple { from: _, to } => {
-                let dst_piece = m0ve.next.board.piece_at(to).map(|(_, piece)| piece);
-                self.dst_pos == to && Some(self.src_piece) == dst_piece
+        match (&m0ve.action, self) {
+            (Action::Simple { from: _, to }, MoveDescription::Simple { src_piece, dst_pos }) => {
+                let dst_piece = m0ve.next.board.piece_at(*to).map(|(_, piece)| piece);
+                dst_pos == to && Some(*src_piece) == dst_piece
             }
             // TODO
-            Action::Castle { kingside: _ } => false,
+            (Action::Castle { kingside: _ }, _) => false,
         }
     }
 }
