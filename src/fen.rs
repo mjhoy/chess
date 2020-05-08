@@ -113,7 +113,6 @@ fn en_passant_pos(input: &str) -> IResult<&str, Option<Pos>> {
     alt((value(None, tag("-")), map(pos, Some)))(input)
 }
 
-// TODO
 fn castling(input: &str) -> IResult<&str, Castling> {
     let (input, res) = many1(alt((tag("-"), tag("K"), tag("Q"), tag("k"), tag("q"))))(input)?;
 
