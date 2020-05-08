@@ -173,55 +173,20 @@ impl State {
         }
     }
 
-    // Can the current player castle, not taking into account whether
-    // they have moved the king or rook already?
-    fn can_castle_psuedo(&self, kingside: bool) -> bool {
-        match (self.player, kingside) {
-            (Player::White, true) => {
-                self.board.piece_at(pos::e1) == Some((self.player, Piece::King))
-                    && self.board.piece_at(pos::h1) == Some((self.player, Piece::Rook))
-                    && self.board.empty_at(pos::f1)
-                    && self.board.empty_at(pos::g1)
-                    && !self.move_puts_current_player_in_check(pos::e1, pos::f1)
-                    && !self.move_puts_current_player_in_check(pos::e1, pos::g1)
-            }
-            (Player::White, false) => {
-                self.board.piece_at(pos::e1) == Some((self.player, Piece::King))
-                    && self.board.piece_at(pos::a1) == Some((self.player, Piece::Rook))
-                    && self.board.empty_at(pos::b1)
-                    && self.board.empty_at(pos::c1)
-                    && self.board.empty_at(pos::d1)
-                    && !self.move_puts_current_player_in_check(pos::e1, pos::d1)
-                    && !self.move_puts_current_player_in_check(pos::e1, pos::c1)
-            }
-            (Player::Black, true) => {
-                self.board.piece_at(pos::e8) == Some((self.player, Piece::King))
-                    && self.board.piece_at(pos::h8) == Some((self.player, Piece::Rook))
-                    && self.board.empty_at(pos::f8)
-                    && self.board.empty_at(pos::g8)
-                    && !self.move_puts_current_player_in_check(pos::e8, pos::f8)
-                    && !self.move_puts_current_player_in_check(pos::e8, pos::g8)
-            }
-            (Player::Black, false) => {
-                self.board.piece_at(pos::e8) == Some((self.player, Piece::King))
-                    && self.board.piece_at(pos::a8) == Some((self.player, Piece::Rook))
-                    && self.board.empty_at(pos::b8)
-                    && self.board.empty_at(pos::c8)
-                    && self.board.empty_at(pos::d8)
-                    && !self.move_puts_current_player_in_check(pos::e8, pos::d8)
-                    && !self.move_puts_current_player_in_check(pos::e8, pos::c8)
-            }
-        }
+    fn can_castle_without_check(&self, kingside: bool) -> bool {
+        let king_pos = self.board.get_king_pos(self.player);
+        let (pos_1, pos_2) = Castling::king_tracks(self.player, kingside);
+
+        !self.in_check()
+            && !self.move_puts_current_player_in_check(king_pos, pos_1)
+            && !self.move_puts_current_player_in_check(king_pos, pos_2)
     }
 
     fn can_castle(&self, kingside: bool) -> bool {
-        let allowed = match (self.player, kingside) {
-            (Player::White, true) => self.castling.white.king,
-            (Player::White, false) => self.castling.white.queen,
-            (Player::Black, true) => self.castling.black.king,
-            (Player::Black, false) => self.castling.black.queen,
-        };
-        allowed && !self.in_check() && self.can_castle_psuedo(kingside)
+        self.castling.able(self.player, kingside)
+            && !self.in_check()
+            && Castling::free(&self.board, self.player, kingside)
+            && self.can_castle_without_check(kingside)
     }
 
     fn build_castle_move(&self, kingside: bool) -> Move {
