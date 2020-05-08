@@ -49,10 +49,21 @@ pub fn pos(input: &str) -> IResult<&str, Pos> {
     Ok((input, Pos { file, rank }))
 }
 
-pub fn an(input: &str) -> IResult<&str, MoveDescription> {
+pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
     Ok((input, MoveDescription::Simple { src_piece, dst_pos }))
+}
+
+fn castle(input: &str) -> IResult<&str, MoveDescription> {
+    alt((
+        value(MoveDescription::Castle { kingside: false }, tag("O-O-O")),
+        value(MoveDescription::Castle { kingside: true }, tag("O-O")),
+    ))(input)
+}
+
+pub fn an(input: &str) -> IResult<&str, MoveDescription> {
+    alt((simple, castle))(input)
 }
 
 /// Parses a movement description from algebraic notation.
@@ -140,6 +151,14 @@ mod test {
                 src_piece: Piece::King,
                 dst_pos: e2,
             })
+        );
+        assert_eq!(
+            parse_an("O-O"),
+            Ok(MoveDescription::Castle { kingside: true })
+        );
+        assert_eq!(
+            parse_an("O-O-O"),
+            Ok(MoveDescription::Castle { kingside: false })
         );
         assert_eq!(
             parse_an("Ze2"),

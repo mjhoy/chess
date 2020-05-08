@@ -2,9 +2,10 @@ use crate::m0ve::{Action, Move};
 use crate::piece::Piece;
 use crate::pos::Pos;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MoveDescription {
     Simple { src_piece: Piece, dst_pos: Pos },
+    Castle { kingside: bool },
 }
 
 impl MoveDescription {
@@ -23,8 +24,15 @@ impl MoveDescription {
                 let dst_piece = m0ve.next.board.piece_at(*to).map(|(_, piece)| piece);
                 dst_pos == to && Some(*src_piece) == dst_piece
             }
-            // TODO
-            (Action::Castle { kingside: _ }, _) => false,
+            (
+                Action::Castle {
+                    kingside: action_kingside,
+                },
+                MoveDescription::Castle {
+                    kingside: description_kingside,
+                },
+            ) => action_kingside == description_kingside,
+            (_, _) => false,
         }
     }
 }
