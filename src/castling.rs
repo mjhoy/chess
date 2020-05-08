@@ -30,7 +30,7 @@ impl Castling {
         }
     }
 
-    pub fn able(&self, player: Player, kingside: bool) -> bool {
+    pub fn able(self, player: Player, kingside: bool) -> bool {
         match (player, kingside) {
             (Player::White, true) => self.white.king,
             (Player::White, false) => self.white.queen,
@@ -40,7 +40,7 @@ impl Castling {
     }
 
     /// If `player` moves a piece at `pos`, what's the next castling state?
-    pub fn after_move(&self, player: Player, pos: Pos) -> Self {
+    pub fn after_move(self, player: Player, pos: Pos) -> Self {
         match player {
             Player::White => match pos {
                 pos::e1 => Castling {
@@ -48,23 +48,23 @@ impl Castling {
                         king: false,
                         queen: false,
                     },
-                    ..*self
+                    ..self
                 },
                 pos::h1 => Castling {
                     white: CastleAbility {
                         king: false,
                         queen: self.white.queen,
                     },
-                    ..*self
+                    ..self
                 },
                 pos::a1 => Castling {
                     white: CastleAbility {
                         king: self.white.king,
                         queen: false,
                     },
-                    ..*self
+                    ..self
                 },
-                _ => self.clone(),
+                _ => self,
             },
             Player::Black => match pos {
                 pos::e8 => Castling {
@@ -72,36 +72,36 @@ impl Castling {
                         king: false,
                         queen: false,
                     },
-                    ..*self
+                    ..self
                 },
                 pos::h8 => Castling {
                     black: CastleAbility {
                         king: false,
                         queen: self.black.queen,
                     },
-                    ..*self
+                    ..self
                 },
                 pos::a8 => Castling {
                     black: CastleAbility {
                         king: self.black.king,
                         queen: false,
                     },
-                    ..*self
+                    ..self
                 },
-                _ => self.clone(),
+                _ => self,
             },
         }
     }
 
     /// Castle. Returns the new castling and board state.
-    pub fn castle(&self, board: &Board, player: Player, kingside: bool) -> (Board, Self) {
+    pub fn castle(self, board: &Board, player: Player, kingside: bool) -> (Board, Self) {
         if player.is_white() {
             let next_castling = Castling {
                 white: CastleAbility {
                     king: false,
                     queen: false,
                 },
-                ..*self
+                ..self
             };
             let next_board = if kingside {
                 board
@@ -119,7 +119,7 @@ impl Castling {
                     king: false,
                     queen: false,
                 },
-                ..*self
+                ..self
             };
             let next_board = if kingside {
                 board
