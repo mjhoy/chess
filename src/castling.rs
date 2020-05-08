@@ -39,6 +39,47 @@ impl Castling {
         }
     }
 
+    /// Castle. Returns the new castling and board state.
+    pub fn castle(&self, board: &Board, player: Player, kingside: bool) -> (Board, Self) {
+        if player.is_white() {
+            let next_castling = Castling {
+                white: CastleAbility {
+                    king: false,
+                    queen: false,
+                },
+                black: self.black,
+            };
+            let next_board = if kingside {
+                board
+                    .move_piece(pos::e1, pos::g1)
+                    .move_piece(pos::h1, pos::f1)
+            } else {
+                board
+                    .move_piece(pos::e1, pos::c1)
+                    .move_piece(pos::a1, pos::d1)
+            };
+            (next_board, next_castling)
+        } else {
+            let next_castling = Castling {
+                black: CastleAbility {
+                    king: false,
+                    queen: false,
+                },
+                white: self.white,
+            };
+            let next_board = if kingside {
+                board
+                    .move_piece(pos::e8, pos::g8)
+                    .move_piece(pos::h8, pos::f8)
+            } else {
+                board
+                    .move_piece(pos::e8, pos::c8)
+                    .move_piece(pos::a8, pos::d8)
+            };
+            (next_board, next_castling)
+        }
+    }
+
     /// Is the castling for `player` unobstructed at `kingside` on a given `board`?
     pub fn free(board: &Board, player: Player, kingside: bool) -> bool {
         match (player, kingside) {

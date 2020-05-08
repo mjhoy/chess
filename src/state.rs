@@ -190,43 +190,7 @@ impl State {
     }
 
     fn build_castle_move(&self, kingside: bool) -> Move {
-        let (next_board, next_castling) = if self.player.is_white() {
-            let next_castling = Castling {
-                white: CastleAbility {
-                    king: false,
-                    queen: false,
-                },
-                black: self.castling.black,
-            };
-            let next_board = if kingside {
-                self.board
-                    .move_piece(pos::e1, pos::g1)
-                    .move_piece(pos::h1, pos::f1)
-            } else {
-                self.board
-                    .move_piece(pos::e1, pos::c1)
-                    .move_piece(pos::a1, pos::d1)
-            };
-            (next_board, next_castling)
-        } else {
-            let next_castling = Castling {
-                black: CastleAbility {
-                    king: false,
-                    queen: false,
-                },
-                white: self.castling.white,
-            };
-            let next_board = if kingside {
-                self.board
-                    .move_piece(pos::e8, pos::g8)
-                    .move_piece(pos::h8, pos::f8)
-            } else {
-                self.board
-                    .move_piece(pos::e8, pos::c8)
-                    .move_piece(pos::a8, pos::d8)
-            };
-            (next_board, next_castling)
-        };
+        let (next_board, next_castling) = self.castling.castle(&self.board, self.player, kingside);
         let next_state = State {
             board: next_board,
             player: self.player.other(),
