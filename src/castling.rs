@@ -48,21 +48,21 @@ impl Castling {
                         king: false,
                         queen: false,
                     },
-                    black: self.black,
+                    ..*self
                 },
                 pos::h1 => Castling {
                     white: CastleAbility {
                         king: false,
                         queen: self.white.queen,
                     },
-                    black: self.black,
+                    ..*self
                 },
                 pos::a1 => Castling {
                     white: CastleAbility {
                         king: self.white.king,
                         queen: false,
                     },
-                    black: self.black,
+                    ..*self
                 },
                 _ => self.clone(),
             },
@@ -72,21 +72,21 @@ impl Castling {
                         king: false,
                         queen: false,
                     },
-                    white: self.white,
+                    ..*self
                 },
                 pos::h8 => Castling {
                     black: CastleAbility {
                         king: false,
                         queen: self.black.queen,
                     },
-                    white: self.black,
+                    ..*self
                 },
                 pos::a8 => Castling {
                     black: CastleAbility {
                         king: self.black.king,
                         queen: false,
                     },
-                    white: self.black,
+                    ..*self
                 },
                 _ => self.clone(),
             },
@@ -101,7 +101,7 @@ impl Castling {
                     king: false,
                     queen: false,
                 },
-                black: self.black,
+                ..*self
             };
             let next_board = if kingside {
                 board
@@ -119,7 +119,7 @@ impl Castling {
                     king: false,
                     queen: false,
                 },
-                white: self.white,
+                ..*self
             };
             let next_board = if kingside {
                 board
