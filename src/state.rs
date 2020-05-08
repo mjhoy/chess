@@ -1,7 +1,6 @@
 use crate::{
-    board::Board, castling::CastleAbility, castling::Castling, from_to_step::FromToStep,
-    m0ve::Action, m0ve::Move, piece::Piece, piece::Piece::*, player::Player, player::Player::*,
-    pos, pos::Pos,
+    board::Board, castling::Castling, from_to_step::FromToStep, m0ve::Action, m0ve::Move,
+    piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos,
 };
 use itertools::Itertools;
 
@@ -111,56 +110,7 @@ impl State {
         } else {
             self.board.move_piece(from, to)
         };
-        let next_castling = match self.player {
-            Player::White => match from {
-                pos::e1 => Castling {
-                    white: CastleAbility {
-                        king: false,
-                        queen: false,
-                    },
-                    black: self.castling.black,
-                },
-                pos::h1 => Castling {
-                    white: CastleAbility {
-                        king: false,
-                        queen: self.castling.white.queen,
-                    },
-                    black: self.castling.black,
-                },
-                pos::a1 => Castling {
-                    white: CastleAbility {
-                        king: self.castling.white.king,
-                        queen: false,
-                    },
-                    black: self.castling.black,
-                },
-                _ => self.castling,
-            },
-            Player::Black => match from {
-                pos::e8 => Castling {
-                    black: CastleAbility {
-                        king: false,
-                        queen: false,
-                    },
-                    white: self.castling.white,
-                },
-                pos::h8 => Castling {
-                    black: CastleAbility {
-                        king: false,
-                        queen: self.castling.black.queen,
-                    },
-                    white: self.castling.black,
-                },
-                pos::a8 => Castling {
-                    black: CastleAbility {
-                        king: self.castling.black.king,
-                        queen: false,
-                    },
-                    white: self.castling.black,
-                },
-                _ => self.castling,
-            },
-        };
+        let next_castling = self.castling.after_move(self.player, from);
         let next_state = State {
             board: next_board,
             player: self.player.other(),

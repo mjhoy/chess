@@ -39,6 +39,60 @@ impl Castling {
         }
     }
 
+    /// If `player` moves a piece at `pos`, what's the next castling state?
+    pub fn after_move(&self, player: Player, pos: Pos) -> Self {
+        match player {
+            Player::White => match pos {
+                pos::e1 => Castling {
+                    white: CastleAbility {
+                        king: false,
+                        queen: false,
+                    },
+                    black: self.black,
+                },
+                pos::h1 => Castling {
+                    white: CastleAbility {
+                        king: false,
+                        queen: self.white.queen,
+                    },
+                    black: self.black,
+                },
+                pos::a1 => Castling {
+                    white: CastleAbility {
+                        king: self.white.king,
+                        queen: false,
+                    },
+                    black: self.black,
+                },
+                _ => self.clone(),
+            },
+            Player::Black => match pos {
+                pos::e8 => Castling {
+                    black: CastleAbility {
+                        king: false,
+                        queen: false,
+                    },
+                    white: self.white,
+                },
+                pos::h8 => Castling {
+                    black: CastleAbility {
+                        king: false,
+                        queen: self.black.queen,
+                    },
+                    white: self.black,
+                },
+                pos::a8 => Castling {
+                    black: CastleAbility {
+                        king: self.black.king,
+                        queen: false,
+                    },
+                    white: self.black,
+                },
+                _ => self.clone(),
+            },
+        }
+    }
+
     /// Castle. Returns the new castling and board state.
     pub fn castle(&self, board: &Board, player: Player, kingside: bool) -> (Board, Self) {
         if player.is_white() {
