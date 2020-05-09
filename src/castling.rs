@@ -55,55 +55,38 @@ impl Castling {
         }
     }
 
+    fn without(self, player: Player, kingside: bool, queenside: bool) -> Self {
+        match player {
+            Player::White => Self {
+                white: CastleAbility {
+                    king: if kingside { false } else { self.white.king },
+                    queen: if queenside { false } else { self.white.queen },
+                },
+                ..self
+            },
+            Player::Black => Self {
+                black: CastleAbility {
+                    king: if kingside { false } else { self.black.king },
+                    queen: if queenside { false } else { self.black.queen },
+                },
+                ..self
+            },
+        }
+    }
+
     /// If `player` moves a piece at `pos`, what's the next castling state?
     pub fn after_move(self, player: Player, pos: Pos) -> Self {
         match player {
             Player::White => match pos {
-                pos::e1 => Castling {
-                    white: CastleAbility {
-                        king: false,
-                        queen: false,
-                    },
-                    ..self
-                },
-                pos::h1 => Castling {
-                    white: CastleAbility {
-                        king: false,
-                        queen: self.white.queen,
-                    },
-                    ..self
-                },
-                pos::a1 => Castling {
-                    white: CastleAbility {
-                        king: self.white.king,
-                        queen: false,
-                    },
-                    ..self
-                },
+                pos::e1 => self.without(player, true, true),
+                pos::h1 => self.without(player, true, false),
+                pos::a1 => self.without(player, false, true),
                 _ => self,
             },
             Player::Black => match pos {
-                pos::e8 => Castling {
-                    black: CastleAbility {
-                        king: false,
-                        queen: false,
-                    },
-                    ..self
-                },
-                pos::h8 => Castling {
-                    black: CastleAbility {
-                        king: false,
-                        queen: self.black.queen,
-                    },
-                    ..self
-                },
-                pos::a8 => Castling {
-                    black: CastleAbility {
-                        king: self.black.king,
-                        queen: false,
-                    },
-                    ..self
-                },
+                pos::e8 => self.without(player, true, true),
+                pos::h8 => self.without(player, true, false),
+                pos::a8 => self.without(player, false, true),
                 _ => self,
             },
         }
@@ -111,41 +94,22 @@ impl Castling {
 
     /// Castle. Returns the new castling and board state.
     pub fn castle(self, board: &Board, player: Player, castleside: Castleside) -> (Board, Self) {
-        if player.is_white() {
-            let next_castling = Castling {
-                white: CastleAbility {
-                    king: false,
-                    queen: false,
-                },
-                ..self
-            };
-            let next_board = match castleside {
-                Castleside::Kingside => board
-                    .move_piece(pos::e1, pos::g1)
-                    .move_piece(pos::h1, pos::f1),
-                Castleside::Queenside => board
-                    .move_piece(pos::e1, pos::c1)
-                    .move_piece(pos::a1, pos::d1),
-            };
-            (next_board, next_castling)
-        } else {
-            let next_castling = Castling {
-                black: CastleAbility {
-                    king: false,
-                    queen: false,
-                },
-                ..self
-            };
-            let next_board = match castleside {
-                Castleside::Kingside => board
-                    .move_piece(pos::e8, pos::g8)
-                    .move_piece(pos::h8, pos::f8),
-                Castleside::Queenside => board
-                    .move_piece(pos::e8, pos::c8)
-                    .move_piece(pos::a8, pos::d8),
-            };
-            (next_board, next_castling)
-        }
+        let next_castling = self.without(player, true, true);
+        let next_board = match (player, castleside) {
+            (Player::White, Castleside::Kingside) => board
+                .move_piece(pos::e1, pos::g1)
+                .move_piece(pos::h1, pos::f1),
+            (Player::White, Castleside::Queenside) => board
+                .move_piece(pos::e1, pos::c1)
+                .move_piece(pos::a1, pos::d1),
+            (Player::Black, Castleside::Kingside) => board
+                .move_piece(pos::e8, pos::g8)
+                .move_piece(pos::h8, pos::f8),
+            (Player::Black, Castleside::Queenside) => board
+                .move_piece(pos::e8, pos::c8)
+                .move_piece(pos::a8, pos::d8),
+        };
+        (next_board, next_castling)
     }
 
     /// Is the castling for `player` unobstructed at `kingside` on a given `board`?
