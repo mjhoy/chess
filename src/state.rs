@@ -1,6 +1,6 @@
 use crate::{
-    board::Board, castling::Castling, from_to_step::FromToStep, m0ve::Action, m0ve::Move,
-    piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos,
+    board::Board, castling::Castleside, castling::Castling, from_to_step::FromToStep, m0ve::Action,
+    m0ve::Move, piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos,
 };
 use itertools::Itertools;
 
@@ -123,24 +123,25 @@ impl State {
         }
     }
 
-    fn can_castle_without_check(&self, kingside: bool) -> bool {
+    fn can_castle_without_check(&self, castleside: Castleside) -> bool {
         let king_pos = self.board.get_king_pos(self.player);
-        let (pos_1, pos_2) = Castling::king_tracks(self.player, kingside);
+        let (pos_1, pos_2) = Castling::king_tracks(self.player, castleside);
 
         !self.in_check()
             && !self.move_puts_current_player_in_check(king_pos, pos_1)
             && !self.move_puts_current_player_in_check(king_pos, pos_2)
     }
 
-    fn can_castle(&self, kingside: bool) -> bool {
-        self.castling.able(self.player, kingside)
+    fn can_castle(&self, castleside: Castleside) -> bool {
+        self.castling.able(self.player, castleside)
             && !self.in_check()
-            && Castling::free(&self.board, self.player, kingside)
-            && self.can_castle_without_check(kingside)
+            && Castling::free(&self.board, self.player, castleside)
+            && self.can_castle_without_check(castleside)
     }
 
-    fn build_castle_move(&self, kingside: bool) -> Move {
-        let (next_board, next_castling) = self.castling.castle(&self.board, self.player, kingside);
+    fn build_castle_move(&self, castleside: Castleside) -> Move {
+        let (next_board, next_castling) =
+            self.castling.castle(&self.board, self.player, castleside);
         let next_state = State {
             board: next_board,
             player: self.player.other(),
@@ -148,7 +149,7 @@ impl State {
             castling: next_castling,
         };
         Move {
-            action: Action::Castle { kingside },
+            action: Action::Castle { castleside },
             next: next_state,
         }
     }
@@ -157,13 +158,15 @@ impl State {
     /// On^2 for n squares
     pub fn gen_moves(&self) -> Vec<Move> {
         let coords = self.board.coords();
-        let castles = [true, false].iter().filter_map(|&kingside| {
-            if self.can_castle(kingside) {
-                Some(self.build_castle_move(kingside))
-            } else {
-                None
-            }
-        });
+        let castles = [Castleside::Kingside, Castleside::Queenside]
+            .iter()
+            .filter_map(|&castleside| {
+                if self.can_castle(castleside) {
+                    Some(self.build_castle_move(castleside))
+                } else {
+                    None
+                }
+            });
         let simples = coords
             .iter()
             .cartesian_product(coords.iter())
@@ -492,8 +495,8 @@ mod test {
     fn test_castling_white_kingside_allowed() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
-        assert!(initial_state.can_castle(true));
-        let next_state = initial_state.build_castle_move(true).next;
+        assert!(initial_state.can_castle(Castleside::Kingside));
+        let next_state = initial_state.build_castle_move(Castleside::Kingside).next;
         assert_eq!(
             next_state.board.piece_at(g1),
             Some((Player::White, Piece::King))
@@ -512,14 +515,14 @@ mod test {
     fn test_castling_white_kingside_not_allowed() {
         let (_, initial_state) =
             fen("rnbqk2r/pp2ppbp/3p1np1/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w Qkq - 2 6").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_after_rook_move() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
-        assert!(initial_state.can_castle(true));
+        assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h1, g1).next;
         assert_eq!(next_state.castling.white.king, false);
         assert_eq!(next_state.castling.white.queen, true);
@@ -529,8 +532,8 @@ mod test {
     fn test_castling_white_queenside_allowed() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
-        assert!(initial_state.can_castle(false));
-        let next_state = initial_state.build_castle_move(false).next;
+        assert!(initial_state.can_castle(Castleside::Queenside));
+        let next_state = initial_state.build_castle_move(Castleside::Queenside).next;
         assert_eq!(
             next_state.board.piece_at(c1),
             Some((Player::White, Piece::King))
@@ -549,14 +552,14 @@ mod test {
     fn test_castling_white_queenside_not_allowed() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/1R2KBNR b Kkq - 1 5").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_white_not_allowed_after_rook_move() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
-        assert!(initial_state.can_castle(false));
+        assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a1, b1).next;
         assert_eq!(next_state.castling.white.king, true);
         assert_eq!(next_state.castling.white.queen, false);
@@ -566,7 +569,7 @@ mod test {
     fn test_castling_white_queenside_not_allowed_after_king_move() {
         let (_, initial_state) =
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
-        assert!(initial_state.can_castle(false));
+        assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(e1, f1).next;
         assert_eq!(next_state.castling.white.king, false);
         assert_eq!(next_state.castling.white.queen, false);
@@ -576,43 +579,43 @@ mod test {
     fn test_castling_white_kingside_not_allowed_out_of_check_move() {
         let (_, initial_state) =
             fen("rnbqk1nr/pp1p2pp/2p1pp2/8/1b6/3PPN2/PPP1BPPP/RNBQK2R w KQkq - 2 5").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_through_check_on_f1_move() {
         let (_, initial_state) =
             fen("rn1qkbnr/ppp1pppp/B2p4/8/2b5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 4 4").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_through_check_on_g1_move() {
         let (_, initial_state) =
             fen("rnbqk2r/pp1p1ppp/2p1p2n/2b5/4PP2/3B1N2/PPPP2PP/RNBQK2R w KQkq - 2 5").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_queenside_not_allowed_through_check_on_d1_move() {
         let (_, initial_state) =
             fen("rn1qk2r/ppp1bppp/3p1n2/4p1B1/3PP1b1/2NQ4/PPP2PPP/R3KBNR w KQkq - 4 6").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_white_queenside_not_allowed_through_check_on_c1_move() {
         let (_, initial_state) =
             fen("rnbqk2r/ppp1pp1p/3p1npb/8/3P4/2NQ4/PPP1PPPP/R3KBNR w KQkq - 2 5").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_kingside_allowed() {
         let (_, initial_state) =
             fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
-        assert!(initial_state.can_castle(true));
-        let next_state = initial_state.build_castle_move(true).next;
+        assert!(initial_state.can_castle(Castleside::Kingside));
+        let next_state = initial_state.build_castle_move(Castleside::Kingside).next;
         assert_eq!(
             next_state.board.piece_at(g8),
             Some((Player::Black, Piece::King))
@@ -631,14 +634,14 @@ mod test {
     fn test_castling_black_kingside_not_allowed() {
         let (_, initial_state) =
             fen("rnbqk1r1/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR w KQq - 3 5").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_after_rook_move() {
         let (_, initial_state) =
             fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
-        assert!(initial_state.can_castle(true));
+        assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h8, g8).next;
         assert_eq!(next_state.castling.black.king, false);
         assert_eq!(next_state.castling.black.queen, true);
@@ -648,7 +651,7 @@ mod test {
     fn test_castling_black_not_allowed_after_king_move() {
         let (_, initial_state) =
             fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
-        assert!(initial_state.can_castle(true));
+        assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(e8, f8).next;
         assert_eq!(next_state.castling.black.king, false);
         assert_eq!(next_state.castling.black.queen, false);
@@ -658,8 +661,8 @@ mod test {
     fn test_castling_black_queenside_allowed() {
         let (_, initial_state) =
             fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
-        assert!(initial_state.can_castle(false));
-        let next_state = initial_state.build_castle_move(false).next;
+        assert!(initial_state.can_castle(Castleside::Queenside));
+        let next_state = initial_state.build_castle_move(Castleside::Queenside).next;
         assert_eq!(
             next_state.board.piece_at(c8),
             Some((Player::Black, Piece::King))
@@ -678,14 +681,14 @@ mod test {
     fn test_castling_black_queenside_not_allowed() {
         let (_, initial_state) =
             fen("1r2kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R w KQk - 1 6").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_after_rook_move() {
         let (_, initial_state) =
             fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
-        assert!(initial_state.can_castle(false));
+        assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a8, b8).next;
         assert_eq!(next_state.castling.black.king, true);
         assert_eq!(next_state.castling.black.queen, false);
@@ -695,34 +698,34 @@ mod test {
     fn test_castling_black_kingside_not_allowed_out_of_check_move() {
         let (_, initial_state) =
             fen("rnbqk2r/ppp1pp1p/5npb/1B1p4/8/2N1PN1P/PPPP1PP1/R1BQK2R b KQkq - 2 5").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_through_check_on_f8_move() {
         let (_, initial_state) =
             fen("rnbqk2r/pppp1ppp/5n2/4p3/8/BP1P1N2/P1P1PPPP/RN1QKB1R b KQkq - 2 4").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_through_check_on_g8_move() {
         let (_, initial_state) =
             fen("rnbqk2r/pppp2pp/5p1n/2b1p3/2B5/2NPPN2/PPP2PPP/R1BQK2R b KQkq - 0 5").unwrap();
-        assert!(!initial_state.can_castle(true));
+        assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_through_check_on_d8_move() {
         let (_, initial_state) =
             fen("r3kbnr/pp1qpppp/n1p5/B2p1b2/8/3PPN1P/PPP2PP1/RN1QKB1R b KQkq - 2 6").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_through_check_on_c8_move() {
         let (_, initial_state) =
             fen("r3kbnr/p1pqpppp/Bpnp4/8/3P4/2P1PNP1/PP3P1P/RNBQK2R b KQkq - 0 6").unwrap();
-        assert!(!initial_state.can_castle(false));
+        assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 }

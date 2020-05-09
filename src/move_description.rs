@@ -1,3 +1,4 @@
+use crate::castling::Castleside;
 use crate::m0ve::{Action, Move};
 use crate::piece::Piece;
 use crate::pos::Pos;
@@ -5,7 +6,7 @@ use crate::pos::Pos;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MoveDescription {
     Simple { src_piece: Piece, dst_pos: Pos },
-    Castle { kingside: bool },
+    Castle { castleside: Castleside },
 }
 
 impl MoveDescription {
@@ -26,12 +27,12 @@ impl MoveDescription {
             }
             (
                 Action::Castle {
-                    kingside: action_kingside,
+                    castleside: action_castleside,
                 },
                 MoveDescription::Castle {
-                    kingside: description_kingside,
+                    castleside: description_castleside,
                 },
-            ) => action_kingside == description_kingside,
+            ) => action_castleside == description_castleside,
             (_, _) => false,
         }
     }

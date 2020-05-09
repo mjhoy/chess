@@ -3,6 +3,7 @@ use crate::piece::Piece;
 use crate::player::Player;
 use crate::pos;
 use crate::pos::Pos;
+use std::fmt;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct CastleAbility {
@@ -14,6 +15,21 @@ pub struct CastleAbility {
 pub struct Castling {
     pub white: CastleAbility,
     pub black: CastleAbility,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Castleside {
+    Kingside,
+    Queenside,
+}
+
+impl fmt::Display for Castleside {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Castleside::Kingside => write!(f, "kingside"),
+            Castleside::Queenside => write!(f, "queenside"),
+        }
+    }
 }
 
 impl Castling {
@@ -30,12 +46,12 @@ impl Castling {
         }
     }
 
-    pub fn able(self, player: Player, kingside: bool) -> bool {
-        match (player, kingside) {
-            (Player::White, true) => self.white.king,
-            (Player::White, false) => self.white.queen,
-            (Player::Black, true) => self.black.king,
-            (Player::Black, false) => self.black.queen,
+    pub fn able(self, player: Player, castleside: Castleside) -> bool {
+        match (player, castleside) {
+            (Player::White, Castleside::Kingside) => self.white.king,
+            (Player::White, Castleside::Queenside) => self.white.queen,
+            (Player::Black, Castleside::Kingside) => self.black.king,
+            (Player::Black, Castleside::Queenside) => self.black.queen,
         }
     }
 
@@ -94,7 +110,7 @@ impl Castling {
     }
 
     /// Castle. Returns the new castling and board state.
-    pub fn castle(self, board: &Board, player: Player, kingside: bool) -> (Board, Self) {
+    pub fn castle(self, board: &Board, player: Player, castleside: Castleside) -> (Board, Self) {
         if player.is_white() {
             let next_castling = Castling {
                 white: CastleAbility {
@@ -103,14 +119,13 @@ impl Castling {
                 },
                 ..self
             };
-            let next_board = if kingside {
-                board
+            let next_board = match castleside {
+                Castleside::Kingside => board
                     .move_piece(pos::e1, pos::g1)
-                    .move_piece(pos::h1, pos::f1)
-            } else {
-                board
+                    .move_piece(pos::h1, pos::f1),
+                Castleside::Queenside => board
                     .move_piece(pos::e1, pos::c1)
-                    .move_piece(pos::a1, pos::d1)
+                    .move_piece(pos::a1, pos::d1),
             };
             (next_board, next_castling)
         } else {
@@ -121,42 +136,41 @@ impl Castling {
                 },
                 ..self
             };
-            let next_board = if kingside {
-                board
+            let next_board = match castleside {
+                Castleside::Kingside => board
                     .move_piece(pos::e8, pos::g8)
-                    .move_piece(pos::h8, pos::f8)
-            } else {
-                board
+                    .move_piece(pos::h8, pos::f8),
+                Castleside::Queenside => board
                     .move_piece(pos::e8, pos::c8)
-                    .move_piece(pos::a8, pos::d8)
+                    .move_piece(pos::a8, pos::d8),
             };
             (next_board, next_castling)
         }
     }
 
     /// Is the castling for `player` unobstructed at `kingside` on a given `board`?
-    pub fn free(board: &Board, player: Player, kingside: bool) -> bool {
-        match (player, kingside) {
-            (Player::White, true) => {
+    pub fn free(board: &Board, player: Player, castleside: Castleside) -> bool {
+        match (player, castleside) {
+            (Player::White, Castleside::Kingside) => {
                 board.piece_at(pos::e1) == Some((player, Piece::King))
                     && board.piece_at(pos::h1) == Some((player, Piece::Rook))
                     && board.empty_at(pos::f1)
                     && board.empty_at(pos::g1)
             }
-            (Player::White, false) => {
+            (Player::White, Castleside::Queenside) => {
                 board.piece_at(pos::e1) == Some((player, Piece::King))
                     && board.piece_at(pos::a1) == Some((player, Piece::Rook))
                     && board.empty_at(pos::b1)
                     && board.empty_at(pos::c1)
                     && board.empty_at(pos::d1)
             }
-            (Player::Black, true) => {
+            (Player::Black, Castleside::Kingside) => {
                 board.piece_at(pos::e8) == Some((player, Piece::King))
                     && board.piece_at(pos::h8) == Some((player, Piece::Rook))
                     && board.empty_at(pos::f8)
                     && board.empty_at(pos::g8)
             }
-            (Player::Black, false) => {
+            (Player::Black, Castleside::Queenside) => {
                 board.piece_at(pos::e8) == Some((player, Piece::King))
                     && board.piece_at(pos::a8) == Some((player, Piece::Rook))
                     && board.empty_at(pos::b8)
@@ -167,12 +181,12 @@ impl Castling {
     }
 
     // Returns the two squares through which the king moves.
-    pub fn king_tracks(player: Player, kingside: bool) -> (Pos, Pos) {
-        match (player, kingside) {
-            (Player::White, true) => (pos::f1, pos::g1),
-            (Player::White, false) => (pos::d1, pos::c1),
-            (Player::Black, true) => (pos::f8, pos::g8),
-            (Player::Black, false) => (pos::d8, pos::c8),
+    pub fn king_tracks(player: Player, castleside: Castleside) -> (Pos, Pos) {
+        match (player, castleside) {
+            (Player::White, Castleside::Kingside) => (pos::f1, pos::g1),
+            (Player::White, Castleside::Queenside) => (pos::d1, pos::c1),
+            (Player::Black, Castleside::Kingside) => (pos::f8, pos::g8),
+            (Player::Black, Castleside::Queenside) => (pos::d8, pos::c8),
         }
     }
 }

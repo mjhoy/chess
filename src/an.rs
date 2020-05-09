@@ -1,3 +1,4 @@
+use crate::castling::Castleside;
 use crate::move_description::MoveDescription;
 use crate::piece::Piece;
 use crate::pos::Pos;
@@ -57,8 +58,18 @@ pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
 
 fn castle(input: &str) -> IResult<&str, MoveDescription> {
     alt((
-        value(MoveDescription::Castle { kingside: false }, tag("O-O-O")),
-        value(MoveDescription::Castle { kingside: true }, tag("O-O")),
+        value(
+            MoveDescription::Castle {
+                castleside: Castleside::Queenside,
+            },
+            tag("O-O-O"),
+        ),
+        value(
+            MoveDescription::Castle {
+                castleside: Castleside::Kingside,
+            },
+            tag("O-O"),
+        ),
     ))(input)
 }
 
@@ -154,11 +165,15 @@ mod test {
         );
         assert_eq!(
             parse_an("O-O"),
-            Ok(MoveDescription::Castle { kingside: true })
+            Ok(MoveDescription::Castle {
+                castleside: Castleside::Kingside
+            })
         );
         assert_eq!(
             parse_an("O-O-O"),
-            Ok(MoveDescription::Castle { kingside: false })
+            Ok(MoveDescription::Castle {
+                castleside: Castleside::Queenside
+            })
         );
         assert_eq!(
             parse_an("Ze2"),
