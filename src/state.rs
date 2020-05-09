@@ -154,29 +154,33 @@ impl State {
         }
     }
 
+    fn make_castle_move(&self, castleside: Castleside) -> Option<Move> {
+        if self.can_castle(castleside) {
+            Some(self.build_castle_move(castleside))
+        } else {
+            None
+        }
+    }
+
+    fn make_simple_move(&self, from: Pos, to: Pos) -> Option<Move> {
+        if self.can_move(from, to) {
+            Some(self.build_simple_move(from, to))
+        } else {
+            None
+        }
+    }
+
     /// Generate the next legal moves for this game state.
     /// On^2 for n squares
     pub fn gen_moves(&self) -> Vec<Move> {
         let coords = self.board.coords();
         let castles = [Castleside::Kingside, Castleside::Queenside]
             .iter()
-            .filter_map(|&castleside| {
-                if self.can_castle(castleside) {
-                    Some(self.build_castle_move(castleside))
-                } else {
-                    None
-                }
-            });
+            .filter_map(|&castleside| self.make_castle_move(castleside));
         let simples = coords
             .iter()
             .cartesian_product(coords.iter())
-            .filter_map(|(&from, &to)| {
-                if self.can_move(from, to) {
-                    Some(self.build_simple_move(from, to))
-                } else {
-                    None
-                }
-            });
+            .filter_map(|(&from, &to)| self.make_simple_move(from, to));
         castles.chain(simples).collect()
     }
 }
