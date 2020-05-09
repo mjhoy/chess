@@ -123,20 +123,21 @@ impl State {
         }
     }
 
-    fn can_castle_without_check(&self, castleside: Castleside) -> bool {
+    fn can_castle(&self, castleside: Castleside) -> bool {
+        // Return early if it's not possible to castle, before
+        // calculating passing through checks.
+        if !(self.castling.able(self.player, castleside)
+            && Castling::free(&self.board, self.player, castleside))
+        {
+            return false;
+        }
+
         let king_pos = self.board.get_king_pos(self.player);
         let (pos_1, pos_2) = Castling::king_tracks(self.player, castleside);
 
         !self.in_check()
             && !self.move_puts_current_player_in_check(king_pos, pos_1)
             && !self.move_puts_current_player_in_check(king_pos, pos_2)
-    }
-
-    fn can_castle(&self, castleside: Castleside) -> bool {
-        self.castling.able(self.player, castleside)
-            && !self.in_check()
-            && Castling::free(&self.board, self.player, castleside)
-            && self.can_castle_without_check(castleside)
     }
 
     fn build_castle_move(&self, castleside: Castleside) -> Move {
