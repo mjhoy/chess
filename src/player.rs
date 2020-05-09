@@ -24,18 +24,4 @@ impl Player {
             Black => White,
         }
     }
-
-    pub fn is_white(self) -> bool {
-        match self {
-            White => true,
-            Black => false,
-        }
-    }
-
-    pub fn is_black(self) -> bool {
-        match self {
-            White => false,
-            Black => true,
-        }
-    }
 }
