@@ -120,12 +120,12 @@ fn castling(input: &str) -> IResult<&str, Castling> {
         input,
         Castling {
             white: CastleAbility {
-                king: res.contains(&"K"),
-                queen: res.contains(&"Q"),
+                kingside: res.contains(&"K"),
+                queenside: res.contains(&"Q"),
             },
             black: CastleAbility {
-                king: res.contains(&"k"),
-                queen: res.contains(&"q"),
+                kingside: res.contains(&"k"),
+                queenside: res.contains(&"q"),
             },
         },
     ))
@@ -247,12 +247,12 @@ mod test {
                 "",
                 Castling {
                     white: CastleAbility {
-                        queen: true,
-                        king: false,
+                        queenside: true,
+                        kingside: false,
                     },
                     black: CastleAbility {
-                        queen: true,
-                        king: true,
+                        queenside: true,
+                        kingside: true,
                     },
                 }
             ))
@@ -263,12 +263,12 @@ mod test {
                 "",
                 Castling {
                     white: CastleAbility {
-                        queen: false,
-                        king: false,
+                        queenside: false,
+                        kingside: false,
                     },
                     black: CastleAbility {
-                        queen: false,
-                        king: false,
+                        queenside: false,
+                        kingside: false,
                     },
                 }
             ))
@@ -291,12 +291,12 @@ mod test {
             state.castling,
             Castling {
                 white: CastleAbility {
-                    king: true,
-                    queen: false,
+                    kingside: true,
+                    queenside: false,
                 },
                 black: CastleAbility {
-                    king: false,
-                    queen: true,
+                    kingside: false,
+                    queenside: true,
                 }
             }
         )

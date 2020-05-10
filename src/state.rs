@@ -510,10 +510,10 @@ mod test {
             next_state.board.piece_at(f1),
             Some((Player::White, Piece::Rook))
         );
-        assert_eq!(next_state.castling.white.king, false);
-        assert_eq!(next_state.castling.white.queen, false);
-        assert_eq!(next_state.castling.black.king, true);
-        assert_eq!(next_state.castling.black.queen, true);
+        assert_eq!(next_state.castling.white.kingside, false);
+        assert_eq!(next_state.castling.white.queenside, false);
+        assert_eq!(next_state.castling.black.kingside, true);
+        assert_eq!(next_state.castling.black.queenside, true);
     }
 
     #[test]
@@ -529,8 +529,8 @@ mod test {
             fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h1, g1).next;
-        assert_eq!(next_state.castling.white.king, false);
-        assert_eq!(next_state.castling.white.queen, true);
+        assert_eq!(next_state.castling.white.kingside, false);
+        assert_eq!(next_state.castling.white.queenside, true);
     }
 
     #[test]
@@ -547,10 +547,10 @@ mod test {
             next_state.board.piece_at(d1),
             Some((Player::White, Piece::Rook))
         );
-        assert_eq!(next_state.castling.white.king, false);
-        assert_eq!(next_state.castling.white.queen, false);
-        assert_eq!(next_state.castling.black.king, true);
-        assert_eq!(next_state.castling.black.queen, true);
+        assert_eq!(next_state.castling.white.kingside, false);
+        assert_eq!(next_state.castling.white.queenside, false);
+        assert_eq!(next_state.castling.black.kingside, true);
+        assert_eq!(next_state.castling.black.queenside, true);
     }
 
     #[test]
@@ -566,8 +566,8 @@ mod test {
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a1, b1).next;
-        assert_eq!(next_state.castling.white.king, true);
-        assert_eq!(next_state.castling.white.queen, false);
+        assert_eq!(next_state.castling.white.kingside, true);
+        assert_eq!(next_state.castling.white.queenside, false);
     }
 
     #[test]
@@ -576,8 +576,8 @@ mod test {
             fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(e1, f1).next;
-        assert_eq!(next_state.castling.white.king, false);
-        assert_eq!(next_state.castling.white.queen, false);
+        assert_eq!(next_state.castling.white.kingside, false);
+        assert_eq!(next_state.castling.white.queenside, false);
     }
 
     #[test]
@@ -629,10 +629,10 @@ mod test {
             next_state.board.piece_at(f8),
             Some((Player::Black, Piece::Rook))
         );
-        assert_eq!(next_state.castling.black.king, false);
-        assert_eq!(next_state.castling.black.queen, false);
-        assert_eq!(next_state.castling.white.king, true);
-        assert_eq!(next_state.castling.white.queen, true);
+        assert_eq!(next_state.castling.black.kingside, false);
+        assert_eq!(next_state.castling.black.queenside, false);
+        assert_eq!(next_state.castling.white.kingside, true);
+        assert_eq!(next_state.castling.white.queenside, true);
     }
 
     #[test]
@@ -648,8 +648,8 @@ mod test {
             fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h8, g8).next;
-        assert_eq!(next_state.castling.black.king, false);
-        assert_eq!(next_state.castling.black.queen, true);
+        assert_eq!(next_state.castling.black.kingside, false);
+        assert_eq!(next_state.castling.black.queenside, true);
     }
 
     #[test]
@@ -658,8 +658,8 @@ mod test {
             fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(e8, f8).next;
-        assert_eq!(next_state.castling.black.king, false);
-        assert_eq!(next_state.castling.black.queen, false);
+        assert_eq!(next_state.castling.black.kingside, false);
+        assert_eq!(next_state.castling.black.queenside, false);
     }
 
     #[test]
@@ -676,10 +676,10 @@ mod test {
             next_state.board.piece_at(d8),
             Some((Player::Black, Piece::Rook))
         );
-        assert_eq!(next_state.castling.black.king, false);
-        assert_eq!(next_state.castling.black.queen, false);
-        assert_eq!(next_state.castling.white.king, true);
-        assert_eq!(next_state.castling.white.queen, true);
+        assert_eq!(next_state.castling.black.kingside, false);
+        assert_eq!(next_state.castling.black.queenside, false);
+        assert_eq!(next_state.castling.white.kingside, true);
+        assert_eq!(next_state.castling.white.queenside, true);
     }
 
     #[test]
@@ -695,8 +695,8 @@ mod test {
             fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a8, b8).next;
-        assert_eq!(next_state.castling.black.king, true);
-        assert_eq!(next_state.castling.black.queen, false);
+        assert_eq!(next_state.castling.black.kingside, true);
+        assert_eq!(next_state.castling.black.queenside, false);
     }
 
     #[test]

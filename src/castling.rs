@@ -8,8 +8,8 @@ use std::fmt;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct CastleAbility {
-    pub king: bool,
-    pub queen: bool,
+    pub kingside: bool,
+    pub queenside: bool,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -37,22 +37,22 @@ impl Castling {
     pub fn initial() -> Self {
         Castling {
             white: CastleAbility {
-                king: true,
-                queen: true,
+                kingside: true,
+                queenside: true,
             },
             black: CastleAbility {
-                king: true,
-                queen: true,
+                kingside: true,
+                queenside: true,
             },
         }
     }
 
     pub fn able(self, player: Player, castleside: Castleside) -> bool {
         match (player, castleside) {
-            (Player::White, Castleside::Kingside) => self.white.king,
-            (Player::White, Castleside::Queenside) => self.white.queen,
-            (Player::Black, Castleside::Kingside) => self.black.king,
-            (Player::Black, Castleside::Queenside) => self.black.queen,
+            (Player::White, Castleside::Kingside) => self.white.kingside,
+            (Player::White, Castleside::Queenside) => self.white.queenside,
+            (Player::Black, Castleside::Kingside) => self.black.kingside,
+            (Player::Black, Castleside::Queenside) => self.black.queenside,
         }
     }
 
@@ -60,15 +60,23 @@ impl Castling {
         match player {
             Player::White => Self {
                 white: CastleAbility {
-                    king: if kingside { false } else { self.white.king },
-                    queen: if queenside { false } else { self.white.queen },
+                    kingside: if kingside { false } else { self.white.kingside },
+                    queenside: if queenside {
+                        false
+                    } else {
+                        self.white.queenside
+                    },
                 },
                 ..self
             },
             Player::Black => Self {
                 black: CastleAbility {
-                    king: if kingside { false } else { self.black.king },
-                    queen: if queenside { false } else { self.black.queen },
+                    kingside: if kingside { false } else { self.black.kingside },
+                    queenside: if queenside {
+                        false
+                    } else {
+                        self.black.queenside
+                    },
                 },
                 ..self
             },
