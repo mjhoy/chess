@@ -1,5 +1,6 @@
-use crate::an::pos;
+use crate::algebraic_notation::pos;
 use crate::board::Board;
+use crate::castling::{CastleAbility, Castling};
 use crate::piece::Piece;
 use crate::player::Player;
 use crate::pos::Pos;
@@ -7,7 +8,7 @@ use crate::state::State;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
-use nom::character::complete::{alpha1, space1};
+use nom::character::complete::space1;
 use nom::combinator::{map, value};
 use nom::error::ErrorKind;
 use nom::multi::{many1, separated_list};
@@ -112,10 +113,22 @@ fn en_passant_pos(input: &str) -> IResult<&str, Option<Pos>> {
     alt((value(None, tag("-")), map(pos, Some)))(input)
 }
 
-// TODO
-fn castling(input: &str) -> IResult<&str, ()> {
-    let (input, _res) = many1(alt((tag("-"), alpha1)))(input)?;
-    Ok((input, ()))
+fn castling(input: &str) -> IResult<&str, Castling> {
+    let (input, res) = many1(alt((tag("-"), tag("K"), tag("Q"), tag("k"), tag("q"))))(input)?;
+
+    Ok((
+        input,
+        Castling {
+            white: CastleAbility {
+                kingside: res.contains(&"K"),
+                queenside: res.contains(&"Q"),
+            },
+            black: CastleAbility {
+                kingside: res.contains(&"k"),
+                queenside: res.contains(&"q"),
+            },
+        },
+    ))
 }
 
 pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
@@ -129,7 +142,7 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
         Piece::Knight => "n",
     };
     if player == Player::White {
-        piece_str.to_uppercase().to_string()
+        piece_str.to_uppercase()
     } else {
         piece_str.to_string()
     }
@@ -159,15 +172,16 @@ pub fn fen(input: &str) -> IResult<&str, State> {
         }
     }
 
-    assert!(
-        squares.len() == 64,
+    assert_eq!(
+        squares.len(),
+        64,
         "parsed board matrix expected to be length 64"
     );
 
     let (input, _) = space1(input)?;
     let (input, player) = current_player(input)?;
     let (input, _) = space1(input)?;
-    let (input, _castling) = castling(input)?;
+    let (input, castling) = castling(input)?;
     let (input, _) = space1(input)?;
     let (input, en_passant) = en_passant_pos(input)?;
 
@@ -178,6 +192,7 @@ pub fn fen(input: &str) -> IResult<&str, State> {
             board,
             player,
             en_passant,
+            castling,
         },
     ))
 }
@@ -224,8 +239,45 @@ mod test {
     }
 
     #[test]
+    fn test_parse_castling() {
+        assert_eq!(castling("KQkq"), Ok(("", Castling::initial())));
+        assert_eq!(
+            castling("Qkq"),
+            Ok((
+                "",
+                Castling {
+                    white: CastleAbility {
+                        queenside: true,
+                        kingside: false,
+                    },
+                    black: CastleAbility {
+                        queenside: true,
+                        kingside: true,
+                    },
+                }
+            ))
+        );
+        assert_eq!(
+            castling("-"),
+            Ok((
+                "",
+                Castling {
+                    white: CastleAbility {
+                        queenside: false,
+                        kingside: false,
+                    },
+                    black: CastleAbility {
+                        queenside: false,
+                        kingside: false,
+                    },
+                }
+            ))
+        );
+    }
+
+    #[test]
     fn test_parse_valid_fen() {
-        let input = "r1b1kb1r/pppppppp/8/8/4P3/8/PPPP1PPP/R1B1KB1R b - e3";
+        let input = "r1b1kb1r/pppppppp/8/8/4P3/8/PPPP1PPP/R1B1KB1R b Kq e3";
         let state_res = fen(input);
         assert!(state_res.is_ok(), "able to parse fen");
         let (_rest, state) = state_res.unwrap();
@@ -235,6 +287,19 @@ mod test {
         assert_eq!(state.board.piece_at(h2), Some((Player::White, Piece::Pawn)));
         assert_eq!(state.board.piece_at(h7), Some((Player::Black, Piece::Pawn)));
         assert_eq!(state.en_passant, Some(e3));
+        assert_eq!(
+            state.castling,
+            Castling {
+                white: CastleAbility {
+                    kingside: true,
+                    queenside: false,
+                },
+                black: CastleAbility {
+                    kingside: false,
+                    queenside: true,
+                }
+            }
+        )
     }
 
     #[test]

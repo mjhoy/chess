@@ -1,7 +1,6 @@
 use std::io;
 
-use chess;
-use chess::an;
+use chess::algebraic_notation;
 use chess::fen;
 use chess::game::Game;
 use chess::state::State;
@@ -62,7 +61,7 @@ fn play_moves(mut state: State, moves: Option<&str>) -> State {
     match moves {
         None => (),
         Some(moves_str) => {
-            let res = separated_list(tag(" "), an::an)(moves_str);
+            let res = separated_list(tag(" "), algebraic_notation::algebraic_notation)(moves_str);
             match res {
                 Ok((_, move_descriptions)) => {
                     for move_description in move_descriptions {
@@ -111,7 +110,7 @@ fn play(mut game: Game) {
             break;
         }
 
-        match an::parse_an(buf.trim()) {
+        match algebraic_notation::parse_algebraic_notation(buf.trim()) {
             Ok(move_description) => match move_description.match_moves(moves) {
                 Some(m0ve) => {
                     game = Game { state: m0ve.next };

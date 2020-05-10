@@ -1,3 +1,4 @@
+use crate::castling::Castleside;
 use crate::move_description::MoveDescription;
 use crate::piece::Piece;
 use crate::pos::Pos;
@@ -49,15 +50,36 @@ pub fn pos(input: &str) -> IResult<&str, Pos> {
     Ok((input, Pos { file, rank }))
 }
 
-pub fn an(input: &str) -> IResult<&str, MoveDescription> {
+pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
-    Ok((input, MoveDescription { src_piece, dst_pos }))
+    Ok((input, MoveDescription::Simple { src_piece, dst_pos }))
+}
+
+fn castle(input: &str) -> IResult<&str, MoveDescription> {
+    alt((
+        value(
+            MoveDescription::Castle {
+                castleside: Castleside::Queenside,
+            },
+            tag("O-O-O"),
+        ),
+        value(
+            MoveDescription::Castle {
+                castleside: Castleside::Kingside,
+            },
+            tag("O-O"),
+        ),
+    ))(input)
+}
+
+pub fn algebraic_notation(input: &str) -> IResult<&str, MoveDescription> {
+    alt((simple, castle))(input)
 }
 
 /// Parses a movement description from algebraic notation.
-pub fn parse_an(input: &str) -> Result<MoveDescription, String> {
-    match an(input) {
+pub fn parse_algebraic_notation(input: &str) -> Result<MoveDescription, String> {
+    match algebraic_notation(input) {
         Ok((ref rem, ref _md)) if !rem.is_empty() => {
             Err("parsing error: extra characters".to_string())
         }
@@ -109,22 +131,22 @@ mod test {
     }
 
     #[test]
-    fn test_an() {
+    fn test_algebraic_notation() {
         assert_eq!(
-            an("Ke2"),
+            algebraic_notation("Ke2"),
             Ok((
                 "",
-                MoveDescription {
+                MoveDescription::Simple {
                     src_piece: Piece::King,
                     dst_pos: e2
                 }
             ))
         );
         assert_eq!(
-            an("a1"),
+            algebraic_notation("a1"),
             Ok((
                 "",
-                MoveDescription {
+                MoveDescription::Simple {
                     src_piece: Piece::Pawn,
                     dst_pos: a1
                 }
@@ -133,20 +155,32 @@ mod test {
     }
 
     #[test]
-    fn test_parse_an() {
+    fn test_parse_algebraic_notation() {
         assert_eq!(
-            parse_an("Ke2"),
-            Ok(MoveDescription {
+            parse_algebraic_notation("Ke2"),
+            Ok(MoveDescription::Simple {
                 src_piece: Piece::King,
                 dst_pos: e2,
             })
         );
         assert_eq!(
-            parse_an("Ze2"),
+            parse_algebraic_notation("O-O"),
+            Ok(MoveDescription::Castle {
+                castleside: Castleside::Kingside
+            })
+        );
+        assert_eq!(
+            parse_algebraic_notation("O-O-O"),
+            Ok(MoveDescription::Castle {
+                castleside: Castleside::Queenside
+            })
+        );
+        assert_eq!(
+            parse_algebraic_notation("Ze2"),
             Err(r#"parsing error: Error(("Ze2", Tag))"#.to_string())
         );
         assert_eq!(
-            parse_an("Ke2junk"),
+            parse_algebraic_notation("Ke2junk"),
             Err(r#"parsing error: extra characters"#.to_string())
         );
     }
