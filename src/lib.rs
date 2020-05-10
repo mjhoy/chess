@@ -1,4 +1,4 @@
-pub mod an;
+pub mod algebraic_notation;
 pub mod board;
 pub mod castling;
 pub mod fen;

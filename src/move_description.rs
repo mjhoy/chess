@@ -41,7 +41,7 @@ impl MoveDescription {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::an::parse_an;
+    use crate::algebraic_notation::parse_algebraic_notation;
     use crate::game::Game;
     use crate::player::Player;
     use crate::pos::*;
@@ -55,7 +55,7 @@ mod test {
         let mut game = test_game();
         for desc in &["e3", "e6", "Ke2", "e5", "Kd3", "e4"] {
             let next_moves = game.state.gen_moves();
-            let move_desc = parse_an(desc).unwrap();
+            let move_desc = parse_algebraic_notation(desc).unwrap();
             game = Game {
                 state: move_desc.match_moves(next_moves).unwrap().next,
             };
@@ -79,7 +79,7 @@ mod test {
             "e4", "e6", "Bc4", "Nc6", "Nf3", "d6", "O-O", "Bd7", "d3", "Qf6", "Nc3", "O-O-O",
         ] {
             let next_moves = game.state.gen_moves();
-            let move_desc = parse_an(desc).unwrap();
+            let move_desc = parse_algebraic_notation(desc).unwrap();
             game = Game {
                 state: move_desc.match_moves(next_moves).unwrap().next,
             };

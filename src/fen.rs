@@ -1,4 +1,4 @@
-use crate::an::pos;
+use crate::algebraic_notation::pos;
 use crate::board::Board;
 use crate::castling::{CastleAbility, Castling};
 use crate::piece::Piece;
