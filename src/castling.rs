@@ -113,7 +113,7 @@ impl Castling {
         (next_board, next_castling)
     }
 
-    /// Is the castling for `player` unobstructed at `kingside` on a given `board`?
+    /// Is the castling for `player` unobstructed at `castleside` on a given `board`?
     pub fn free(board: &Board, player: Player, castleside: Castleside) -> bool {
         match (player, castleside) {
             (Player::White, Castleside::Kingside) => board.all_empty(&[f1, g1]),
