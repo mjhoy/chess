@@ -1,8 +1,10 @@
-use crate::{piece::Piece::*, player::Player, player::Player::*, pos::Pos, square::Square};
+use crate::{piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos};
 use ansi_term::Colour;
 use ansi_term::Style;
 
 use itertools::Itertools;
+
+type Square = Option<(Player, Piece)>;
 
 pub type BoardMatrix = Vec<Square>;
 

@@ -9,7 +9,6 @@ pub mod move_description;
 pub mod piece;
 pub mod player;
 pub mod pos;
-pub mod square;
 pub mod state;
 
 use crate::game::Game;
