@@ -14,7 +14,7 @@ pub struct State {
 
 impl State {
     /// Is the current player in check?
-    pub fn in_check(&self) -> bool {
+    fn in_check(&self) -> bool {
         let to_pos = self.board.get_king_pos(self.player);
         let next_move_state = State {
             board: self.board.clone(),
@@ -58,7 +58,7 @@ impl State {
         }
     }
 
-    pub fn move_puts_current_player_in_check(&self, from_pos: Pos, to_pos: Pos) -> bool {
+    fn move_puts_current_player_in_check(&self, from_pos: Pos, to_pos: Pos) -> bool {
         let next_state = State {
             player: self.player,
             board: self.board.move_piece(from_pos, to_pos),
@@ -69,7 +69,7 @@ impl State {
     }
 
     /// Can the current player move the piece in `from_pos` to `to_pos`?
-    pub fn can_move(&self, from_pos: Pos, to_pos: Pos) -> bool {
+    fn can_move(&self, from_pos: Pos, to_pos: Pos) -> bool {
         if !self.can_move_pseudo(from_pos, to_pos) {
             return false;
         }
