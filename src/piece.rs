@@ -83,7 +83,7 @@ impl Piece {
     /// Is this piece able to move from `from` to `to` for a given `state`? This piece
     /// is owned by the current player. This does not take into account whether or not
     /// the king is in check.
-    pub fn eyes(&self, from: Pos, to: Pos, state: &State) -> bool {
+    pub fn eyes(self, from: Pos, to: Pos, state: &State) -> bool {
         let board = &state.board;
         let player = state.player;
 
