@@ -1,6 +1,6 @@
 use crate::algebraic_notation::pos;
 use crate::board::Board;
-use crate::castling::{CastleAbility, Castling};
+use crate::castles::{CastleAbility, Castles};
 use crate::piece::Piece;
 use crate::player::Player;
 use crate::pos::Pos;
@@ -113,12 +113,12 @@ fn en_passant_pos(input: &str) -> IResult<&str, Option<Pos>> {
     alt((value(None, tag("-")), map(pos, Some)))(input)
 }
 
-fn castling(input: &str) -> IResult<&str, Castling> {
+fn castling(input: &str) -> IResult<&str, Castles> {
     let (input, res) = many1(alt((tag("-"), tag("K"), tag("Q"), tag("k"), tag("q"))))(input)?;
 
     Ok((
         input,
-        Castling {
+        Castles {
             white: CastleAbility {
                 kingside: res.contains(&"K"),
                 queenside: res.contains(&"Q"),
@@ -240,12 +240,12 @@ mod test {
 
     #[test]
     fn test_parse_castling() {
-        assert_eq!(castling("KQkq"), Ok(("", Castling::initial())));
+        assert_eq!(castling("KQkq"), Ok(("", Castles::initial())));
         assert_eq!(
             castling("Qkq"),
             Ok((
                 "",
-                Castling {
+                Castles {
                     white: CastleAbility {
                         queenside: true,
                         kingside: false,
@@ -261,7 +261,7 @@ mod test {
             castling("-"),
             Ok((
                 "",
-                Castling {
+                Castles {
                     white: CastleAbility {
                         queenside: false,
                         kingside: false,
@@ -289,7 +289,7 @@ mod test {
         assert_eq!(state.en_passant, Some(e3));
         assert_eq!(
             state.castling,
-            Castling {
+            Castles {
                 white: CastleAbility {
                     kingside: true,
                     queenside: false,

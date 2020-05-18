@@ -13,7 +13,7 @@ pub struct CastleAbility {
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
-pub struct Castling {
+pub struct Castles {
     pub white: CastleAbility,
     pub black: CastleAbility,
 }
@@ -33,9 +33,9 @@ impl fmt::Display for Castleside {
     }
 }
 
-impl Castling {
+impl Castles {
     pub fn initial() -> Self {
-        Castling {
+        Castles {
             white: CastleAbility {
                 kingside: true,
                 queenside: true,

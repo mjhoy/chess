@@ -1,6 +1,6 @@
 pub mod algebraic_notation;
 pub mod board;
-pub mod castling;
+pub mod castles;
 pub mod fen;
 pub mod from_to_step;
 pub mod game;

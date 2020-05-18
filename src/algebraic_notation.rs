@@ -1,4 +1,4 @@
-use crate::castling::Castleside;
+use crate::castles::Castleside;
 use crate::move_description::MoveDescription;
 use crate::piece::Piece;
 use crate::pos::Pos;

@@ -1,5 +1,5 @@
 use crate::{
-    board::Board, castling::Castleside, castling::Castling, from_to_step::FromToStep, m0ve::Action,
+    board::Board, castles::Castleside, castles::Castles, from_to_step::FromToStep, m0ve::Action,
     m0ve::Move, piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos,
 };
 use itertools::Itertools;
@@ -9,7 +9,7 @@ pub struct State {
     pub board: Board,
     pub player: Player,
     pub en_passant: Option<Pos>,
-    pub castling: Castling,
+    pub castling: Castles,
 }
 
 impl State {
@@ -127,13 +127,13 @@ impl State {
         // Return early if it's not possible to castle, before
         // calculating passing through checks.
         if !(self.castling.able(self.player, castleside)
-            && Castling::free(&self.board, self.player, castleside))
+            && Castles::free(&self.board, self.player, castleside))
         {
             return false;
         }
 
         let king_pos = self.board.get_king_pos(self.player);
-        let (pos_1, pos_2) = Castling::king_tracks(self.player, castleside);
+        let (pos_1, pos_2) = Castles::king_tracks(self.player, castleside);
 
         !self.in_check()
             && !self.move_puts_current_player_in_check(king_pos, pos_1)
@@ -328,7 +328,7 @@ mod test {
             board,
             player,
             en_passant: None,
-            castling: Castling::initial(),
+            castling: Castles::initial(),
         }
     }
 
