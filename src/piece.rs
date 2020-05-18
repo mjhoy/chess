@@ -80,8 +80,12 @@ impl Piece {
         }
     }
 
+    /// Is this piece able to move from `from` to `to` for a given `state`? This piece
+    /// is owned by the current player. This does not take into account whether or not
+    /// the king is in check.
     pub fn eyes(&self, from: Pos, to: Pos, state: &State) -> bool {
-        let (board, player) = (&state.board, state.player);
+        let board = &state.board;
+        let player = state.player;
 
         match self {
             Piece::Pawn => {
