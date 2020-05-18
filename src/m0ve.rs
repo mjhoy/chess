@@ -1,4 +1,4 @@
-use crate::{castling::Castleside, pos::Pos, state::State};
+use crate::{castles::Castleside, pos::Pos, state::State};
 use std::fmt;
 
 pub enum Action {

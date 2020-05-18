@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::castling::Castling;
+use crate::castles::Castles;
 use crate::player::Player::*;
 use crate::state::State;
 
@@ -15,7 +15,7 @@ impl Default for Game {
             board,
             player,
             en_passant: None,
-            castling: Castling::initial(),
+            castling: Castles::initial(),
         };
         Game { state }
     }
