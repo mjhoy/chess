@@ -1,6 +1,6 @@
 use crate::{
-    board::Board, castles::Castles, castles::Castleside, m0ve::Action, m0ve::Move, piece::Piece,
-    piece::Piece::*, player::Player, pos::Pos,
+    board::Board, castles::Castles, castles::Castleside, m0ve::Action, m0ve::Move, piece::Piece::*,
+    player::Player, pos::Pos,
 };
 use itertools::Itertools;
 
@@ -31,10 +31,6 @@ impl State {
         false
     }
 
-    fn can_move_piece(&self, piece: Piece, from: Pos, to: Pos) -> bool {
-        piece.eyes(from, to, self)
-    }
-
     // Can the current player move the piece, not taking into account
     // whether the king is in check?
     fn can_move_pseudo(&self, from: Pos, to: Pos) -> bool {
@@ -45,7 +41,7 @@ impl State {
             (None, _) => false,
             (Some((fp, _)), _) if fp != self.player => false,
             (_, Some((tp, _))) if tp == self.player => false,
-            (Some((_, piece)), _) => self.can_move_piece(piece, from, to),
+            (Some((_, piece)), _) => piece.eyes(from, to, self),
         }
     }
 
