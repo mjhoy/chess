@@ -37,19 +37,15 @@ impl MoveDescription {
                     dst_pos,
                 },
             ) => {
+                if src_file.is_some() && src_file != &Some(from.file) {
+                    return false;
+                }
+
+                if src_rank.is_some() && src_rank != &Some(from.rank) {
+                    return false;
+                }
+
                 let dst_piece = m0ve.next.board.piece_at(*to).map(|(_, piece)| piece);
-
-                if let Some(incl_src_file) = src_file {
-                    if incl_src_file != &from.file {
-                        return false;
-                    }
-                }
-
-                if let Some(incl_src_rank) = src_rank {
-                    if incl_src_rank != &from.rank {
-                        return false;
-                    }
-                }
 
                 dst_pos == to && Some(*src_piece) == dst_piece
             }
