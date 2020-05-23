@@ -18,26 +18,32 @@ pub enum MoveDescription {
 
 impl MoveDescription {
     pub fn match_moves(&self, moves: Vec<Move>) -> Option<Move> {
-        for m0ve in moves {
-            if self.match_move(&m0ve) {
-                return Some(m0ve);
-            }
+        let matched: Vec<Move> = moves.into_iter().filter(|m| self.match_move(m)).collect();
+        if matched.len() == 1 {
+            return matched.into_iter().next();
+        } else {
+            return None;
         }
-        None
     }
 
     fn match_move(&self, m0ve: &Move) -> bool {
         match (&m0ve.action, self) {
             (
-                Action::Simple { from: _, to },
+                Action::Simple { from, to },
                 MoveDescription::Simple {
-                    src_file: _,
+                    src_file,
                     src_rank: _,
                     src_piece,
                     dst_pos,
                 },
             ) => {
                 let dst_piece = m0ve.next.board.piece_at(*to).map(|(_, piece)| piece);
+
+                if let Some(incl_src_file) = src_file {
+                    if incl_src_file != &from.file {
+                        return false;
+                    }
+                }
                 dst_pos == to && Some(*src_piece) == dst_piece
             }
             (
@@ -57,12 +63,41 @@ impl MoveDescription {
 mod test {
     use super::*;
     use crate::algebraic_notation::parse_algebraic_notation;
+    use crate::fen::fen;
     use crate::game::Game;
     use crate::player::Player;
     use crate::pos::*;
 
     fn test_game() -> Game {
         Game::default()
+    }
+
+    #[test]
+    fn test_match_moves_needs_disambiguating_file() {
+        let (_, state) = fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
+        let moves = state.gen_moves();
+        let desc = MoveDescription::Simple {
+            src_file: None,
+            src_rank: None,
+            src_piece: Piece::Knight,
+            dst_pos: d5,
+        };
+        let matched = desc.match_moves(moves);
+        assert_eq!(matched, None);
+    }
+
+    #[test]
+    fn test_match_moves_has_disambiguating_file() {
+        let (_, state) = fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
+        let moves = state.gen_moves();
+        let desc = MoveDescription::Simple {
+            src_file: Some(2),
+            src_rank: None,
+            src_piece: Piece::Knight,
+            dst_pos: d5,
+        };
+        let matched = desc.match_moves(moves);
+        assert_ne!(matched, None);
     }
 
     #[test]
