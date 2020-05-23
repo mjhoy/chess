@@ -53,7 +53,15 @@ pub fn pos(input: &str) -> IResult<&str, Pos> {
 pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
-    Ok((input, MoveDescription::Simple { src_piece, dst_pos }))
+    Ok((
+        input,
+        MoveDescription::Simple {
+            src_piece,
+            src_rank: None,
+            src_file: None,
+            dst_pos,
+        },
+    ))
 }
 
 fn castle(input: &str) -> IResult<&str, MoveDescription> {
@@ -138,7 +146,9 @@ mod test {
                 "",
                 MoveDescription::Simple {
                     src_piece: Piece::King,
-                    dst_pos: e2
+                    src_rank: None,
+                    src_file: None,
+                    dst_pos: e2,
                 }
             ))
         );
@@ -148,7 +158,9 @@ mod test {
                 "",
                 MoveDescription::Simple {
                     src_piece: Piece::Pawn,
-                    dst_pos: a1
+                    src_rank: None,
+                    src_file: None,
+                    dst_pos: a1,
                 }
             ))
         );
@@ -160,6 +172,8 @@ mod test {
             parse_algebraic_notation("Ke2"),
             Ok(MoveDescription::Simple {
                 src_piece: Piece::King,
+                src_rank: None,
+                src_file: None,
                 dst_pos: e2,
             })
         );

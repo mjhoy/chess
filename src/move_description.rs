@@ -5,8 +5,15 @@ use crate::pos::Pos;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MoveDescription {
-    Simple { src_piece: Piece, dst_pos: Pos },
-    Castle { castleside: Castleside },
+    Simple {
+        src_piece: Piece,
+        src_rank: Option<u8>,
+        src_file: Option<u8>,
+        dst_pos: Pos,
+    },
+    Castle {
+        castleside: Castleside,
+    },
 }
 
 impl MoveDescription {
@@ -21,7 +28,15 @@ impl MoveDescription {
 
     fn match_move(&self, m0ve: &Move) -> bool {
         match (&m0ve.action, self) {
-            (Action::Simple { from: _, to }, MoveDescription::Simple { src_piece, dst_pos }) => {
+            (
+                Action::Simple { from: _, to },
+                MoveDescription::Simple {
+                    src_file: _,
+                    src_rank: _,
+                    src_piece,
+                    dst_pos,
+                },
+            ) => {
                 let dst_piece = m0ve.next.board.piece_at(*to).map(|(_, piece)| piece);
                 dst_pos == to && Some(*src_piece) == dst_piece
             }
