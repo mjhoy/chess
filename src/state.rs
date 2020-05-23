@@ -4,7 +4,7 @@ use crate::{
 };
 use itertools::Itertools;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct State {
     pub board: Board,
     pub player: Player,

@@ -50,10 +50,73 @@ pub fn pos(input: &str) -> IResult<&str, Pos> {
     Ok((input, Pos { file, rank }))
 }
 
-pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
+fn simple_disambiguate_all(input: &str) -> IResult<&str, MoveDescription> {
+    let (input, src_piece) = piece(input)?;
+    let (input, src_file) = file(input)?;
+    let (input, src_rank) = rank(input)?;
+    let (input, dst_pos) = pos(input)?;
+    Ok((
+        input,
+        MoveDescription::Simple {
+            src_piece,
+            src_rank: Some(src_rank),
+            src_file: Some(src_file),
+            dst_pos,
+        },
+    ))
+}
+
+fn simple_disambiguate_rank(input: &str) -> IResult<&str, MoveDescription> {
+    let (input, src_piece) = piece(input)?;
+    let (input, src_rank) = rank(input)?;
+    let (input, dst_pos) = pos(input)?;
+    Ok((
+        input,
+        MoveDescription::Simple {
+            src_piece,
+            src_rank: Some(src_rank),
+            src_file: None,
+            dst_pos,
+        },
+    ))
+}
+
+fn simple_disambiguate_file(input: &str) -> IResult<&str, MoveDescription> {
+    let (input, src_piece) = piece(input)?;
+    let (input, src_file) = file(input)?;
+    let (input, dst_pos) = pos(input)?;
+    Ok((
+        input,
+        MoveDescription::Simple {
+            src_piece,
+            src_rank: None,
+            src_file: Some(src_file),
+            dst_pos,
+        },
+    ))
+}
+
+fn simple_no_disambiguation(input: &str) -> IResult<&str, MoveDescription> {
     let (input, src_piece) = piece(input)?;
     let (input, dst_pos) = pos(input)?;
-    Ok((input, MoveDescription::Simple { src_piece, dst_pos }))
+    Ok((
+        input,
+        MoveDescription::Simple {
+            src_piece,
+            src_rank: None,
+            src_file: None,
+            dst_pos,
+        },
+    ))
+}
+
+pub fn simple(input: &str) -> IResult<&str, MoveDescription> {
+    alt((
+        simple_disambiguate_all,
+        simple_disambiguate_rank,
+        simple_disambiguate_file,
+        simple_no_disambiguation,
+    ))(input)
 }
 
 fn castle(input: &str) -> IResult<&str, MoveDescription> {
@@ -138,7 +201,9 @@ mod test {
                 "",
                 MoveDescription::Simple {
                     src_piece: Piece::King,
-                    dst_pos: e2
+                    src_rank: None,
+                    src_file: None,
+                    dst_pos: e2,
                 }
             ))
         );
@@ -148,7 +213,9 @@ mod test {
                 "",
                 MoveDescription::Simple {
                     src_piece: Piece::Pawn,
-                    dst_pos: a1
+                    src_rank: None,
+                    src_file: None,
+                    dst_pos: a1,
                 }
             ))
         );
@@ -160,7 +227,36 @@ mod test {
             parse_algebraic_notation("Ke2"),
             Ok(MoveDescription::Simple {
                 src_piece: Piece::King,
+                src_rank: None,
+                src_file: None,
                 dst_pos: e2,
+            })
+        );
+        assert_eq!(
+            parse_algebraic_notation("Bdb8"),
+            Ok(MoveDescription::Simple {
+                src_piece: Piece::Bishop,
+                src_rank: None,
+                src_file: Some(3),
+                dst_pos: b8,
+            })
+        );
+        assert_eq!(
+            parse_algebraic_notation("R1a3"),
+            Ok(MoveDescription::Simple {
+                src_piece: Piece::Rook,
+                src_rank: Some(0),
+                src_file: None,
+                dst_pos: a3,
+            })
+        );
+        assert_eq!(
+            parse_algebraic_notation("Qh4e1"),
+            Ok(MoveDescription::Simple {
+                src_piece: Piece::Queen,
+                src_rank: Some(3),
+                src_file: Some(7),
+                dst_pos: e1,
             })
         );
         assert_eq!(

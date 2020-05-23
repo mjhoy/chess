@@ -1,11 +1,13 @@
 use crate::{castles::Castleside, pos::Pos, state::State};
 use std::fmt;
 
+#[derive(PartialEq, Debug)]
 pub enum Action {
     Simple { from: Pos, to: Pos },
     Castle { castleside: Castleside },
 }
 
+#[derive(PartialEq, Debug)]
 pub struct Move {
     pub action: Action,
     pub next: State,
