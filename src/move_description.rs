@@ -20,9 +20,9 @@ impl MoveDescription {
     pub fn match_moves(&self, moves: Vec<Move>) -> Option<Move> {
         let matched: Vec<Move> = moves.into_iter().filter(|m| self.match_move(m)).collect();
         if matched.len() == 1 {
-            return matched.into_iter().next();
+            matched.into_iter().next()
         } else {
-            return None;
+            None
         }
     }
 
