@@ -32,7 +32,7 @@ impl MoveDescription {
                 Action::Simple { from, to },
                 MoveDescription::Simple {
                     src_file,
-                    src_rank: _,
+                    src_rank,
                     src_piece,
                     dst_pos,
                 },
@@ -44,6 +44,13 @@ impl MoveDescription {
                         return false;
                     }
                 }
+
+                if let Some(incl_src_rank) = src_rank {
+                    if incl_src_rank != &from.rank {
+                        return false;
+                    }
+                }
+
                 dst_pos == to && Some(*src_piece) == dst_piece
             }
             (
@@ -95,6 +102,34 @@ mod test {
             src_rank: None,
             src_piece: Piece::Knight,
             dst_pos: d5,
+        };
+        let matched = desc.match_moves(moves);
+        assert_ne!(matched, None);
+    }
+
+    #[test]
+    fn test_match_moves_needs_disambiguating_rank() {
+        let (_, state) = fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
+        let moves = state.gen_moves();
+        let desc = MoveDescription::Simple {
+            src_file: None,
+            src_rank: None,
+            src_piece: Piece::Knight,
+            dst_pos: d4,
+        };
+        let matched = desc.match_moves(moves);
+        assert_eq!(matched, None);
+    }
+
+    #[test]
+    fn test_match_moves_has_disambiguating_rank() {
+        let (_, state) = fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
+        let moves = state.gen_moves();
+        let desc = MoveDescription::Simple {
+            src_file: None,
+            src_rank: Some(2),
+            src_piece: Piece::Knight,
+            dst_pos: d4,
         };
         let matched = desc.match_moves(moves);
         assert_ne!(matched, None);
