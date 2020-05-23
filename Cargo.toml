@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Michael Hoy <mjh@mjhoy.com>"]
 edition = "2018"
 
+[[bin]]
+name = "chess"
+path = "src/bin/main.rs"
+
 [dependencies]
 itertools = "0.7.8"
 nom = "5.0.0"
