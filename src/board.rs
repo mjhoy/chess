@@ -11,7 +11,7 @@ pub type BoardMatrix = Vec<Square>;
 const NSIZE: u8 = 8;
 
 /// 3x3 board
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Board {
     inner: BoardMatrix,
 }
