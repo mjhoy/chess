@@ -1,7 +1,7 @@
-use crate::castles::Castleside;
-use crate::move_description::MoveDescription;
-use crate::piece::Piece;
-use crate::pos::Pos;
+use crate::game::castles::Castleside;
+use crate::game::move_description::MoveDescription;
+use crate::game::piece::Piece;
+use crate::game::pos::Pos;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::value;
@@ -167,7 +167,7 @@ pub fn parse_algebraic_notation_multiple(input: &str) -> Result<Vec<MoveDescript
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::pos::*;
+    use crate::game::pos::*;
     use nom::{error::ErrorKind, error_position, Err};
 
     #[test]

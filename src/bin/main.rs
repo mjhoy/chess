@@ -1,8 +1,8 @@
 use std::io;
 
+use chess::game::state::State;
 use chess::game::Game;
 use chess::parsing;
-use chess::state::State;
 use clap::{App, Arg, SubCommand};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");

@@ -1,7 +1,16 @@
-use crate::board::Board;
-use crate::castles::Castles;
-use crate::player::Player::*;
-use crate::state::State;
+pub mod board;
+pub mod castles;
+pub mod m0ve;
+pub mod move_description;
+pub mod piece;
+pub mod player;
+pub mod pos;
+pub mod state;
+
+use self::board::Board;
+use self::castles::Castles;
+use self::player::Player::*;
+use self::state::State;
 
 pub struct Game {
     pub state: State,

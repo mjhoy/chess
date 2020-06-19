@@ -1,7 +1,7 @@
-use crate::castles::Castleside;
-use crate::m0ve::{Action, Move};
-use crate::piece::Piece;
-use crate::pos::Pos;
+use crate::game::castles::Castleside;
+use crate::game::m0ve::{Action, Move};
+use crate::game::piece::Piece;
+use crate::game::pos::Pos;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MoveDescription {
@@ -65,11 +65,11 @@ impl MoveDescription {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::game::player::Player;
+    use crate::game::pos::*;
     use crate::game::Game;
     use crate::parsing::parse_algebraic_notation;
     use crate::parsing::parse_fen;
-    use crate::player::Player;
-    use crate::pos::*;
 
     fn test_game() -> Game {
         Game::default()

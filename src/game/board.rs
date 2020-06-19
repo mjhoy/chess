@@ -1,4 +1,4 @@
-use crate::{piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos};
+use crate::game::{piece::Piece, piece::Piece::*, player::Player, player::Player::*, pos::Pos};
 use ansi_term::Colour;
 use ansi_term::Style;
 
@@ -204,7 +204,7 @@ impl Board {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::pos::*;
+    use crate::game::pos::*;
 
     #[test]
     fn test_piece_at_finds_piece() {

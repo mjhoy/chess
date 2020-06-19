@@ -1,4 +1,4 @@
-use crate::{
+use crate::game::{
     board::Board, castles::Castles, castles::Castleside, m0ve::Action, m0ve::Move, piece::Piece::*,
     player::Player, pos::Pos,
 };
@@ -176,10 +176,10 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::game::piece::Piece;
+    use crate::game::player::Player::*;
+    use crate::game::pos::*;
     use crate::parsing::parse_fen;
-    use crate::piece::Piece;
-    use crate::player::Player::*;
-    use crate::pos::*;
 
     fn simple_state(board: Board, player: Player) -> State {
         State {
