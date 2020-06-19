@@ -1,8 +1,8 @@
-use crate::from_to_step::FromToStep;
 use crate::game::board::Board;
 use crate::game::player::Player::*;
 use crate::game::pos::Pos;
 use crate::game::state::State;
+use crate::util::from_to_step::FromToStep;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Piece {
