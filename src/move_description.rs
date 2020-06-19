@@ -65,9 +65,9 @@ impl MoveDescription {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::algebraic_notation::parse_algebraic_notation;
-    use crate::fen::fen;
     use crate::game::Game;
+    use crate::parsing::parse_algebraic_notation;
+    use crate::parsing::parse_fen;
     use crate::player::Player;
     use crate::pos::*;
 
@@ -77,7 +77,7 @@ mod test {
 
     #[test]
     fn test_match_moves_needs_disambiguating_file() {
-        let (_, state) = fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
         let moves = state.gen_moves();
         let desc = MoveDescription::Simple {
             src_file: None,
@@ -91,7 +91,7 @@ mod test {
 
     #[test]
     fn test_match_moves_has_disambiguating_file() {
-        let (_, state) = fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/3k4/8/8/8/2N1N3/3K4/8 w - - 0 1").unwrap();
         let moves = state.gen_moves();
         let desc = MoveDescription::Simple {
             src_file: Some(2),
@@ -105,7 +105,7 @@ mod test {
 
     #[test]
     fn test_match_moves_needs_disambiguating_rank() {
-        let (_, state) = fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
         let moves = state.gen_moves();
         let desc = MoveDescription::Simple {
             src_file: None,
@@ -119,7 +119,7 @@ mod test {
 
     #[test]
     fn test_match_moves_has_disambiguating_rank() {
-        let (_, state) = fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/3k4/8/1N6/8/1N6/3K4/8 w - - 0 1").unwrap();
         let moves = state.gen_moves();
         let desc = MoveDescription::Simple {
             src_file: None,

@@ -1,6 +1,6 @@
-use crate::algebraic_notation::pos;
 use crate::board::Board;
 use crate::castles::{CastleAbility, Castles};
+use crate::parsing::algebraic_notation::pos;
 use crate::piece::Piece;
 use crate::player::Player;
 use crate::pos::Pos;
@@ -148,9 +148,7 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
     }
 }
 
-/// Parses Forsyth-Edwards notation:
-/// https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation
-pub fn fen(input: &str) -> IResult<&str, State> {
+fn fen(input: &str) -> IResult<&str, State> {
     let (input, rows) = separated_list(tag("/"), row)(input)?;
     if rows.len() != 8 {
         // TODO: custom error
@@ -195,6 +193,15 @@ pub fn fen(input: &str) -> IResult<&str, State> {
             castling,
         },
     ))
+}
+
+/// Parses Forsyth-Edwards notation:
+/// https://en.wikipedia.org/wiki/Forsyth–Edwards_Notation
+pub fn parse_fen(input: &str) -> Result<State, String> {
+    match fen(input) {
+        Ok((_, state)) => Ok(state),
+        _ => Err(format!("parsing error: {}", input)),
+    }
 }
 
 #[cfg(test)]

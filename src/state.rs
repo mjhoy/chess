@@ -176,7 +176,7 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::fen::fen;
+    use crate::parsing::parse_fen;
     use crate::piece::Piece;
     use crate::player::Player::*;
     use crate::pos::*;
@@ -209,20 +209,20 @@ mod test {
 
     #[test]
     fn test_in_check() {
-        let (_, not_in_check_state) = fen("8/8/8/8/8/pkp5/8/PKP5 w - -").unwrap();
+        let not_in_check_state = parse_fen("8/8/8/8/8/pkp5/8/PKP5 w - -").unwrap();
         assert!(!not_in_check_state.in_check());
 
-        let (_, in_check_state_1) = fen("8/8/8/8/8/1kp5/p7/PKP5 w - -").unwrap();
+        let in_check_state_1 = parse_fen("8/8/8/8/8/1kp5/p7/PKP5 w - -").unwrap();
         assert!(in_check_state_1.in_check());
 
-        let (_, in_check_state_2) = fen("8/8/8/8/8/pk6/P1p5/1KP5 b - -").unwrap();
+        let in_check_state_2 = parse_fen("8/8/8/8/8/pk6/P1p5/1KP5 b - -").unwrap();
         assert!(in_check_state_2.in_check());
     }
 
     #[test]
     fn test_castling_white_kingside_allowed() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_castle_move(Castleside::Kingside).next;
         assert_eq!(
@@ -241,15 +241,15 @@ mod test {
 
     #[test]
     fn test_castling_white_kingside_not_allowed() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pp2ppbp/3p1np1/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w Qkq - 2 6").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pp2ppbp/3p1np1/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w Qkq - 2 6").unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_after_rook_move() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp2pppp/3p1n2/2p5/2B5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 0 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h1, g1).next;
         assert_eq!(next_state.castling.white.kingside, false);
@@ -258,8 +258,9 @@ mod test {
 
     #[test]
     fn test_castling_white_queenside_allowed() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5")
+                .unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_castle_move(Castleside::Queenside).next;
         assert_eq!(
@@ -278,15 +279,17 @@ mod test {
 
     #[test]
     fn test_castling_white_queenside_not_allowed() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/1R2KBNR b Kkq - 1 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/1R2KBNR b Kkq - 1 5")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_white_not_allowed_after_rook_move() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5")
+                .unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a1, b1).next;
         assert_eq!(next_state.castling.white.kingside, true);
@@ -295,8 +298,9 @@ mod test {
 
     #[test]
     fn test_castling_white_queenside_not_allowed_after_king_move() {
-        let (_, initial_state) =
-            fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqkb1r/pp3ppp/2p1pn2/3p4/3P1B2/2NQ4/PPP1PPPP/R3KBNR w KQkq - 0 5")
+                .unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(e1, f1).next;
         assert_eq!(next_state.castling.white.kingside, false);
@@ -305,43 +309,45 @@ mod test {
 
     #[test]
     fn test_castling_white_kingside_not_allowed_out_of_check_move() {
-        let (_, initial_state) =
-            fen("rnbqk1nr/pp1p2pp/2p1pp2/8/1b6/3PPN2/PPP1BPPP/RNBQK2R w KQkq - 2 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk1nr/pp1p2pp/2p1pp2/8/1b6/3PPN2/PPP1BPPP/RNBQK2R w KQkq - 2 5").unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_through_check_on_f1_move() {
-        let (_, initial_state) =
-            fen("rn1qkbnr/ppp1pppp/B2p4/8/2b5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 4 4").unwrap();
+        let initial_state =
+            parse_fen("rn1qkbnr/ppp1pppp/B2p4/8/2b5/4PN2/PPPP1PPP/RNBQK2R w KQkq - 4 4").unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_kingside_not_allowed_through_check_on_g1_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pp1p1ppp/2p1p2n/2b5/4PP2/3B1N2/PPPP2PP/RNBQK2R w KQkq - 2 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pp1p1ppp/2p1p2n/2b5/4PP2/3B1N2/PPPP2PP/RNBQK2R w KQkq - 2 5")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_white_queenside_not_allowed_through_check_on_d1_move() {
-        let (_, initial_state) =
-            fen("rn1qk2r/ppp1bppp/3p1n2/4p1B1/3PP1b1/2NQ4/PPP2PPP/R3KBNR w KQkq - 4 6").unwrap();
+        let initial_state =
+            parse_fen("rn1qk2r/ppp1bppp/3p1n2/4p1B1/3PP1b1/2NQ4/PPP2PPP/R3KBNR w KQkq - 4 6")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_white_queenside_not_allowed_through_check_on_c1_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/ppp1pp1p/3p1npb/8/3P4/2NQ4/PPP1PPPP/R3KBNR w KQkq - 2 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/ppp1pp1p/3p1npb/8/3P4/2NQ4/PPP1PPPP/R3KBNR w KQkq - 2 5").unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_kingside_allowed() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_castle_move(Castleside::Kingside).next;
         assert_eq!(
@@ -360,15 +366,15 @@ mod test {
 
     #[test]
     fn test_castling_black_kingside_not_allowed() {
-        let (_, initial_state) =
-            fen("rnbqk1r1/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR w KQq - 3 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk1r1/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR w KQq - 3 5").unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_after_rook_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(h8, g8).next;
         assert_eq!(next_state.castling.black.kingside, false);
@@ -377,8 +383,8 @@ mod test {
 
     #[test]
     fn test_castling_black_not_allowed_after_king_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pppp1ppp/5n2/2b1p3/4P3/3P4/PPPB1PPP/RN1QKBNR b KQkq - 2 4").unwrap();
         assert!(initial_state.can_castle(Castleside::Kingside));
         let next_state = initial_state.build_simple_move(e8, f8).next;
         assert_eq!(next_state.castling.black.kingside, false);
@@ -387,8 +393,8 @@ mod test {
 
     #[test]
     fn test_castling_black_queenside_allowed() {
-        let (_, initial_state) =
-            fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_castle_move(Castleside::Queenside).next;
         assert_eq!(
@@ -407,15 +413,15 @@ mod test {
 
     #[test]
     fn test_castling_black_queenside_not_allowed() {
-        let (_, initial_state) =
-            fen("1r2kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R w KQk - 1 6").unwrap();
+        let initial_state =
+            parse_fen("1r2kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R w KQk - 1 6").unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_after_rook_move() {
-        let (_, initial_state) =
-            fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("r3kbnr/pppqpppp/2npb3/8/3P4/2P1PN2/PP3PPP/RNBQKB1R b KQkq - 0 5").unwrap();
         assert!(initial_state.can_castle(Castleside::Queenside));
         let next_state = initial_state.build_simple_move(a8, b8).next;
         assert_eq!(next_state.castling.black.kingside, true);
@@ -424,36 +430,39 @@ mod test {
 
     #[test]
     fn test_castling_black_kingside_not_allowed_out_of_check_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/ppp1pp1p/5npb/1B1p4/8/2N1PN1P/PPPP1PP1/R1BQK2R b KQkq - 2 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/ppp1pp1p/5npb/1B1p4/8/2N1PN1P/PPPP1PP1/R1BQK2R b KQkq - 2 5")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_through_check_on_f8_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pppp1ppp/5n2/4p3/8/BP1P1N2/P1P1PPPP/RN1QKB1R b KQkq - 2 4").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pppp1ppp/5n2/4p3/8/BP1P1N2/P1P1PPPP/RN1QKB1R b KQkq - 2 4").unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_kingside_not_allowed_through_check_on_g8_move() {
-        let (_, initial_state) =
-            fen("rnbqk2r/pppp2pp/5p1n/2b1p3/2B5/2NPPN2/PPP2PPP/R1BQK2R b KQkq - 0 5").unwrap();
+        let initial_state =
+            parse_fen("rnbqk2r/pppp2pp/5p1n/2b1p3/2B5/2NPPN2/PPP2PPP/R1BQK2R b KQkq - 0 5")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Kingside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_through_check_on_d8_move() {
-        let (_, initial_state) =
-            fen("r3kbnr/pp1qpppp/n1p5/B2p1b2/8/3PPN1P/PPP2PP1/RN1QKB1R b KQkq - 2 6").unwrap();
+        let initial_state =
+            parse_fen("r3kbnr/pp1qpppp/n1p5/B2p1b2/8/3PPN1P/PPP2PP1/RN1QKB1R b KQkq - 2 6")
+                .unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 
     #[test]
     fn test_castling_black_queenside_not_allowed_through_check_on_c8_move() {
-        let (_, initial_state) =
-            fen("r3kbnr/p1pqpppp/Bpnp4/8/3P4/2P1PNP1/PP3P1P/RNBQK2R b KQkq - 0 6").unwrap();
+        let initial_state =
+            parse_fen("r3kbnr/p1pqpppp/Bpnp4/8/3P4/2P1PNP1/PP3P1P/RNBQK2R b KQkq - 0 6").unwrap();
         assert!(!initial_state.can_castle(Castleside::Queenside));
     }
 }

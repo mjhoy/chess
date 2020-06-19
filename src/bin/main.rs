@@ -1,12 +1,9 @@
 use std::io;
 
-use chess::algebraic_notation;
-use chess::fen;
 use chess::game::Game;
+use chess::parsing;
 use chess::state::State;
 use clap::{App, Arg, SubCommand};
-use nom::bytes::complete::tag;
-use nom::multi::separated_list;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -47,8 +44,8 @@ fn setup_game(initial_fen: Option<&str>) -> Game {
     match initial_fen {
         None => chess::new_game(),
         Some(fen_str) => {
-            let result = fen::fen(fen_str);
-            if let Ok((_, state)) = result {
+            let result = parsing::parse_fen(fen_str);
+            if let Ok(state) = result {
                 Game::with_state(state)
             } else {
                 panic!("Couldn't parse fen: {:?}", result);
@@ -61,9 +58,9 @@ fn play_moves(mut state: State, moves: Option<&str>) -> State {
     match moves {
         None => (),
         Some(moves_str) => {
-            let res = separated_list(tag(" "), algebraic_notation::algebraic_notation)(moves_str);
+            let res = parsing::parse_algebraic_notation_multiple(moves_str);
             match res {
-                Ok((_, move_descriptions)) => {
+                Ok(move_descriptions) => {
                     for move_description in move_descriptions {
                         let game_moves = state.gen_moves();
                         match move_description.match_moves(game_moves) {
@@ -110,7 +107,7 @@ fn play(mut game: Game) {
             break;
         }
 
-        match algebraic_notation::parse_algebraic_notation(buf.trim()) {
+        match parsing::parse_algebraic_notation(buf.trim()) {
             Ok(move_description) => match move_description.match_moves(moves) {
                 Some(m0ve) => {
                     game = Game { state: m0ve.next };

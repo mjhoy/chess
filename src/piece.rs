@@ -150,7 +150,7 @@ impl Piece {
 mod test {
     use super::*;
     use crate::castles::Castles;
-    use crate::fen::fen;
+    use crate::parsing::parse_fen;
     use crate::player::Player;
     use crate::pos::*;
 
@@ -166,14 +166,14 @@ mod test {
     fn test_simple_board_for_piece_lateral_king() -> Board {
         // White king at d4, black king at b7. See here:
         // https://lichess.org/analysis/8/1k6/8/8/3K4/8/8/8_w_-_-_0_1
-        let (_, state) = fen("8/1k6/8/8/3K4/8/8/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/1k6/8/8/3K4/8/8/8 w - - 0 1").unwrap();
         state.board
     }
 
     fn test_simple_board_for_piece_diagonal_king() -> Board {
         // White king at d3, black king at b7. See here:
         // https://lichess.org/analysis/standard/8/1k6/8/8/2Q5/3K4/8/8/8_w_-_-
-        let (_, state) = fen("8/1k6/8/8/8/3K4/8/8 w - - 0 1").unwrap();
+        let state = parse_fen("8/1k6/8/8/8/3K4/8/8 w - - 0 1").unwrap();
         state.board
     }
 
@@ -247,36 +247,38 @@ mod test {
 
     #[test]
     fn test_one_square_pawn_advance() {
-        let (_, initial_state) = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
+        let initial_state = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
         assert!(Piece::Pawn.eyes(e2, e3, &initial_state));
 
-        let (_, one_e4) = fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
+        let one_e4 = parse_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
         assert!(Piece::Pawn.eyes(e7, e6, &one_e4));
     }
 
     #[test]
     fn test_two_square_pawn_advance() {
-        let (_, initial_state) = fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
+        let initial_state = parse_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - -").unwrap();
         assert!(Piece::Pawn.eyes(e2, e4, &initial_state));
 
-        let (_, one_e4) = fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
+        let one_e4 = parse_fen("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b - -").unwrap();
         assert!(Piece::Pawn.eyes(e7, e5, &one_e4));
 
-        let (_, blocking) = fen("rnbqk1nr/pppp1ppp/4p3/8/4P3/b2P4/PPP2PPP/RNBQKBNR w - -").unwrap();
+        let blocking =
+            parse_fen("rnbqk1nr/pppp1ppp/4p3/8/4P3/b2P4/PPP2PPP/RNBQKBNR w - -").unwrap();
         assert!(!Piece::Pawn.eyes(a2, a4, &blocking));
 
-        let (_, blocking2) = fen("rnbqk1nr/pppp1ppp/8/3Pp3/4P3/b7/PPP2PPP/RNBQKBNR b - -").unwrap();
+        let blocking2 =
+            parse_fen("rnbqk1nr/pppp1ppp/8/3Pp3/4P3/b7/PPP2PPP/RNBQKBNR b - -").unwrap();
         assert!(!Piece::Pawn.eyes(d7, d5, &blocking2));
     }
 
     #[test]
     fn test_en_passant_capture() {
-        let (_, initial_state) =
-            fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6").unwrap();
+        let initial_state =
+            parse_fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6").unwrap();
         assert!(Piece::Pawn.eyes(e5, f6, &initial_state));
 
-        let (_, initial_state) =
-            fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq -").unwrap();
+        let initial_state =
+            parse_fen("rnbqkbnr/ppppp1p1/7p/4Pp2/8/8/PPPP1PPP/RNBQKBNR w KQkq -").unwrap();
         assert!(!Piece::Pawn.eyes(e5, f6, &initial_state));
     }
 }
