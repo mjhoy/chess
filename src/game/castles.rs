@@ -1,9 +1,9 @@
 #![allow(non_upper_case_globals)]
 
-use crate::board::Board;
-use crate::player::Player;
-use crate::pos::Pos;
-use crate::pos::*;
+use crate::game::board::Board;
+use crate::game::player::Player;
+use crate::game::pos::Pos;
+use crate::game::pos::*;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]

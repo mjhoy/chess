@@ -1,4 +1,4 @@
-use crate::{castles::Castleside, pos::Pos, state::State};
+use crate::game::{castles::Castleside, pos::Pos, state::State};
 use std::fmt;
 
 #[derive(PartialEq, Debug)]

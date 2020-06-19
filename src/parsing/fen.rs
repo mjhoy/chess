@@ -1,10 +1,10 @@
-use crate::board::Board;
-use crate::castles::{CastleAbility, Castles};
+use crate::game::board::Board;
+use crate::game::castles::{CastleAbility, Castles};
+use crate::game::piece::Piece;
+use crate::game::player::Player;
+use crate::game::pos::Pos;
+use crate::game::state::State;
 use crate::parsing::algebraic_notation::pos;
-use crate::piece::Piece;
-use crate::player::Player;
-use crate::pos::Pos;
-use crate::state::State;
 
 use nom::branch::alt;
 use nom::bytes::complete::tag;
@@ -207,7 +207,7 @@ pub fn parse_fen(input: &str) -> Result<State, String> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::pos::*;
+    use crate::game::pos::*;
 
     #[test]
     fn test_parse_white_row() {

@@ -1,8 +1,8 @@
-use crate::board::Board;
-use crate::from_to_step::FromToStep;
-use crate::player::Player::*;
-use crate::pos::Pos;
-use crate::state::State;
+use crate::game::board::Board;
+use crate::game::player::Player::*;
+use crate::game::pos::Pos;
+use crate::game::state::State;
+use crate::util::from_to_step::FromToStep;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Piece {
@@ -149,10 +149,10 @@ impl Piece {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::castles::Castles;
+    use crate::game::castles::Castles;
+    use crate::game::player::Player;
+    use crate::game::pos::*;
     use crate::parsing::parse_fen;
-    use crate::player::Player;
-    use crate::pos::*;
 
     fn simple_state(board: Board, player: Player) -> State {
         State {
