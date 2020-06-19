@@ -5,8 +5,6 @@ use chess::fen;
 use chess::game::Game;
 use chess::state::State;
 use clap::{App, Arg, SubCommand};
-use nom::bytes::complete::tag;
-use nom::multi::separated_list;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
@@ -61,9 +59,9 @@ fn play_moves(mut state: State, moves: Option<&str>) -> State {
     match moves {
         None => (),
         Some(moves_str) => {
-            let res = separated_list(tag(" "), algebraic_notation::algebraic_notation)(moves_str);
+            let res = algebraic_notation::parse_algebraic_notation_multiple(moves_str);
             match res {
-                Ok((_, move_descriptions)) => {
+                Ok(move_descriptions) => {
                     for move_description in move_descriptions {
                         let game_moves = state.gen_moves();
                         match move_description.match_moves(game_moves) {

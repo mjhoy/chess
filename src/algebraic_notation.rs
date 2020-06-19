@@ -5,6 +5,7 @@ use crate::pos::Pos;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::value;
+use nom::multi::separated_list;
 use nom::IResult;
 
 fn piece(input: &str) -> IResult<&str, Piece> {
@@ -136,8 +137,12 @@ fn castle(input: &str) -> IResult<&str, MoveDescription> {
     ))(input)
 }
 
-pub fn algebraic_notation(input: &str) -> IResult<&str, MoveDescription> {
+fn algebraic_notation(input: &str) -> IResult<&str, MoveDescription> {
     alt((simple, castle))(input)
+}
+
+fn algebraic_notation_multiple(input: &str) -> IResult<&str, Vec<MoveDescription>> {
+    separated_list(tag(" "), algebraic_notation)(input)
 }
 
 /// Parses a movement description from algebraic notation.
@@ -148,6 +153,14 @@ pub fn parse_algebraic_notation(input: &str) -> Result<MoveDescription, String> 
         }
         Ok((_remaining, md)) => Ok(md),
         Err(e) => Err(format!("parsing error: {:?}", e)),
+    }
+}
+
+/// Parse multiple moves from algebraic notation.
+pub fn parse_algebraic_notation_multiple(input: &str) -> Result<Vec<MoveDescription>, String> {
+    match algebraic_notation_multiple(input) {
+        Ok((_, move_descriptions)) => Ok(move_descriptions),
+        _ => Err(format!("parsing error: {}", input)),
     }
 }
 
