@@ -5,7 +5,7 @@ use crate::game::pos::Pos;
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::value;
-use nom::multi::separated_list;
+use nom::multi::separated_list0;
 use nom::IResult;
 
 fn piece(input: &str) -> IResult<&str, Piece> {
@@ -142,7 +142,7 @@ fn algebraic_notation(input: &str) -> IResult<&str, MoveDescription> {
 }
 
 fn algebraic_notation_multiple(input: &str) -> IResult<&str, Vec<MoveDescription>> {
-    separated_list(tag(" "), algebraic_notation)(input)
+    separated_list0(tag(" "), algebraic_notation)(input)
 }
 
 /// Parses a movement description from algebraic notation.
@@ -286,7 +286,7 @@ mod test {
         );
         assert_eq!(
             parse_algebraic_notation("Ze2"),
-            Err(r#"parsing error: Error(("Ze2", Tag))"#.to_string())
+            Err(r#"parsing error: Error(Error { input: "Ze2", code: Tag })"#.to_string())
         );
         assert_eq!(
             parse_algebraic_notation("Ke2junk"),
