@@ -10,8 +10,8 @@ use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::space1;
 use nom::combinator::{map, value};
-use nom::error::ErrorKind;
-use nom::multi::{many1, separated_list};
+use nom::error::{make_error, ErrorKind};
+use nom::multi::{many1, separated_list0};
 use nom::Err;
 use nom::IResult;
 
@@ -92,7 +92,7 @@ fn row(input: &str) -> IResult<&str, Vec<SquareBuilder>> {
             }
         }
         if count > 8 {
-            return Err(Err::Error((input, ErrorKind::TooLarge)));
+            return Err(Err::Error(make_error(input, ErrorKind::TooLarge)));
         }
         if count == 8 {
             full = true;
@@ -149,10 +149,10 @@ pub fn piece_to_fen(player_piece: (Player, Piece)) -> String {
 }
 
 fn fen(input: &str) -> IResult<&str, State> {
-    let (input, rows) = separated_list(tag("/"), row)(input)?;
+    let (input, rows) = separated_list0(tag("/"), row)(input)?;
     if rows.len() != 8 {
         // TODO: custom error
-        return Err(Err::Error((input, ErrorKind::TooLarge)));
+        return Err(Err::Error(make_error(input, ErrorKind::TooLarge)));
     }
 
     let mut squares = Vec::new();
@@ -242,7 +242,10 @@ mod test {
     #[test]
     fn test_parse_too_large_row() {
         let input = "6k7";
-        assert_eq!(row(input), Err(Err::Error(("", ErrorKind::TooLarge))));
+        assert_eq!(
+            row(input),
+            Err(Err::Error(make_error("", ErrorKind::TooLarge)))
+        );
     }
 
     #[test]
